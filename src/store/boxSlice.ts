@@ -25,7 +25,7 @@ const generateInitialBoxes = (): BoxObject[] => {
       width: Math.random() * 100 + 80, // Random width between 80-180
       height: 30,
       text: generateRandomString(Math.floor(Math.random() * 16) + 5), // 5-20 chars
-      color: 'white',
+      color: 'grey',
       stackOrder: i
     });
   }
@@ -70,7 +70,7 @@ export const boxSlice = createSlice({
       saveToHistory(state);
       const object = state.objects.find(obj => obj.id === action.payload);
       if (object) {
-        object.color = object.color === 'white' ? 'yellow' : 'white';
+        object.color = object.color === 'grey' ? 'yellow' : 'grey';
       }
     },
     
@@ -134,7 +134,7 @@ export const boxSlice = createSlice({
         width: 120,
         height: 30,
         text: action.payload.properties.name || 'Container',
-        color: 'white',
+        color: 'grey',
         children: [],
         parentId: action.payload.parentId,
         stackOrder: state.objects.length
@@ -153,7 +153,7 @@ export const boxSlice = createSlice({
         width: 100,
         height: 30,
         text: action.payload.properties.content || 'Info',
-        color: 'white',
+        color: 'grey',
         parentId: action.payload.parentId,
         stackOrder: state.objects.length
       };

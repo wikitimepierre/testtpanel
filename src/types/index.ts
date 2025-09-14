@@ -6,7 +6,7 @@ export interface BoxObject {
   width: number;
   height: number;
   text: string;
-  color: 'white' | 'yellow';
+  color: 'grey' | 'yellow';
   children?: BoxObject[];
   parentId?: string;
   stackOrder: number;

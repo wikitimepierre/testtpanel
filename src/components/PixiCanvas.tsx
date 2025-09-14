@@ -88,7 +88,7 @@ const PixiCanvas: React.FC = () => {
 
       // Create box graphics
       const box = new PIXI.Graphics();
-      box.beginFill(obj.color === 'white' ? 0xFFFFFF : 0xFFFF00);
+      box.beginFill(obj.color === 'grey' ? 0xDDDDDD : 0xFFFF00);
       box.lineStyle(2, 0x000000);
       box.drawRect(0, 0, obj.width, obj.height);
       box.endFill();
@@ -128,7 +128,7 @@ const PixiCanvas: React.FC = () => {
       container.on('pointerleave', () => {
         if (!isDragging) {
           box.clear();
-          box.beginFill(obj.color === 'white' ? 0xFFFFFF : 0xFFFF00);
+          box.beginFill(obj.color === 'grey' ? 0xDDDDDD : 0xFFFF00);
           box.lineStyle(2, 0x000000);
           box.drawRect(0, 0, obj.width, obj.height);
           box.endFill();
