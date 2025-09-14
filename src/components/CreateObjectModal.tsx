@@ -1,0 +1,115 @@
+import React, { useState } from 'react';
+import { useAppDispatch } from '../hooks/redux';
+import { createContainer, createInfo } from '../store/boxSlice';
+import { X } from 'lucide-react';
+
+interface CreateObjectModalProps {
+  type: 'container' | 'info';
+  parentId: string | null;
+  onClose: () => void;
+}
+
+const CreateObjectModal: React.FC<CreateObjectModalProps> = ({ type, parentId, onClose }) => {
+  const dispatch = useAppDispatch();
+  const [formData, setFormData] = useState<Record<string, string>>({});
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (type === 'container') {
+      dispatch(createContainer({ parentId, properties: formData }));
+    } else {
+      dispatch(createInfo({ parentId, properties: formData }));
+    }
+    
+    onClose();
+  };
+
+  const handleChange = (key: string, value: string) => {
+    setFormData(prev => ({ ...prev, [key]: value }));
+  };
+
+  const containerFields = [
+    { key: 'name', label: 'Container Name', type: 'text', required: true },
+    { key: 'description', label: 'Description', type: 'textarea', required: false },
+    { key: 'category', label: 'Category', type: 'text', required: false }
+  ];
+
+  const infoFields = [
+    { key: 'content', label: 'Content', type: 'text', required: true },
+    { key: 'priority', label: 'Priority', type: 'select', options: ['Low', 'Medium', 'High'], required: false },
+    { key: 'tags', label: 'Tags', type: 'text', placeholder: 'Comma separated', required: false }
+  ];
+
+  const fields = type === 'container' ? containerFields : infoFields;
+
+  return (
+    <div className="modal-backdrop">
+      <div className="modal">
+        <div className="modal-header">
+          <h2 className="text-xl">Create New {type === 'container' ? 'Container' : 'Information Object'}</h2>
+          <button onClick={onClose} className="btn btn-outline">
+            <X size={24} />
+          </button>
+        </div>
+        <form onSubmit={handleSubmit}>
+          {fields.map(field => (
+            <div key={field.key} className="mb-4">
+              <label className="label">
+                {field.label}
+                {field.required && <span className="text-red">*</span>}
+              </label>
+              {field.type === 'textarea' ? (
+                <textarea
+                  value={formData[field.key] || ''}
+                  onChange={(e) => handleChange(field.key, e.target.value)}
+                  className="textarea"
+                  rows={3}
+                  required={field.required}
+                />
+              ) : field.type === 'select' ? (
+                <select
+                  value={formData[field.key] || ''}
+                  onChange={(e) => handleChange(field.key, e.target.value)}
+                  className="select"
+                  required={field.required}
+                >
+                  <option value="">Select...</option>
+                  {field.options?.map(option => (
+                    <option key={option} value={option}>{option}</option>
+                  ))}
+                </select>
+              ) : (
+                <input
+                  type={field.type}
+                  value={formData[field.key] || ''}
+                  onChange={(e) => handleChange(field.key, e.target.value)}
+                  placeholder={field.placeholder}
+                  className="input"
+                  required={field.required}
+                />
+              )}
+            </div>
+          ))}
+          <div className="flex-center space-x-3">
+            <button
+              type="button"
+              onClick={onClose}
+              className="btn btn-outline"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="btn btn-blue"
+            >
+              Create
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+};
+
+export default CreateObjectModal;
