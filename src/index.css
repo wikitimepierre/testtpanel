@@ -7,7 +7,6 @@
   right: 0;
   background: #fff;
   border-top: 1px solid #d1d5db;
-  padding: 1rem;
 }
 .flex-center {
   display: flex;
@@ -117,9 +116,6 @@
 }
 .input, .textarea, .select {
   width: 100%;
-  padding: 0.5rem 0.75rem;
-  border: 1px solid #d1d5db;
-  border-radius: 0.375rem;
   outline: none;
   transition: box-shadow 0.2s;
 }
@@ -129,9 +125,13 @@
 .mb-4 {
   margin-bottom: 1rem;
 }
-.w-full {
-  width: 100%;
-}
-.h-full {
-  height: 100%;
+.pixi-canvas-top {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  margin: 0;
+  padding: 0;
+  z-index: 1;
 }

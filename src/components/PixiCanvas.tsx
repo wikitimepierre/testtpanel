@@ -26,10 +26,10 @@ const PixiCanvas: React.FC = () => {
       
       try {
         await app.init({
-          width: 800,
-          height: 600,
-          backgroundColor: 0x000000,
-          backgroundAlpha: 0
+          width: 1500,
+          height: 1000,
+          backgroundColor: 0x00FF00, // Green
+          backgroundAlpha: 1
         });
         
         // Check if canvasRef is still valid before appending
