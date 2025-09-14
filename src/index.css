@@ -1,3 +1,19 @@
+/* Ensure control panel/buttons are above the canvas */
+.control-panel {
+  z-index: 2;
+  position: relative;
+}
+.pixi-canvas-top {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 1000px;
+  height: 700px;
+  margin: 0;
+  padding: 0;
+  z-index: 0;
+  border: 3px solid red;
+}
 /* Classic CSS replacement for Tailwind utility classes used in the app */
 
 .control-panel {
