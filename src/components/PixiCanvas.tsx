@@ -99,15 +99,16 @@ const PixiCanvas: React.FC = () => {
         style: {
           fontFamily: 'Arial',
           fontSize: 12,
-          fill: 0x000000
+          fill: 0x000000,
+          align: 'center',
         }
       });
-      text.x = obj.width + 10;
+      // Center text horizontally and vertically in the box
+      text.x = (obj.width - text.width) / 2;
       text.y = (obj.height - text.height) / 2;
 
       container.addChild(box);
       container.addChild(text);
-      
       console.log('Created container at', container.x, container.y, 'with dimensions', obj.width, 'x', obj.height);
 
       // Make interactive
