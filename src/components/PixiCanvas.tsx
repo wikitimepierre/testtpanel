@@ -138,10 +138,10 @@ const PixiCanvas: React.FC = () => {
 
       // Click events
       container.on('pointerdown', (event) => {
-        dispatch(setActiveObject(obj.id));
-        setIsDragging(true);
-        setDragStartY(event.global.y);
-        setDragObjectId(obj.id);
+  dispatch(setActiveObject(obj.id));
+  setIsDragging(true);
+  setDragStartY(event.clientY);
+  setDragObjectId(obj.id);
         
         // Start drag timer
         setTimeout(() => {
@@ -172,7 +172,6 @@ const PixiCanvas: React.FC = () => {
         const deltaY = event.clientY - dragStartY;
         const newStackOrder = Math.max(0, Math.min(objects.length - 1, 
           Math.round(deltaY / 35) + objects.find(o => o.id === dragObjectId)!.stackOrder));
-        
         // Visual feedback during drag
         const container = objectsRef.current.get(dragObjectId);
         if (container) {
