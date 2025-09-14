@@ -136,7 +136,7 @@ export const boxSlice = createSlice({
         text: action.payload.properties.name || 'Container',
         color: 'grey',
         children: [],
-        parentId: action.payload.parentId,
+        ...(action.payload.parentId ? { parentId: action.payload.parentId } : {}),
         stackOrder: state.objects.length
       };
       
@@ -154,7 +154,7 @@ export const boxSlice = createSlice({
         height: 30,
         text: action.payload.properties.content || 'Info',
         color: 'grey',
-        parentId: action.payload.parentId,
+        ...(action.payload.parentId ? { parentId: action.payload.parentId } : {}),
         stackOrder: state.objects.length
       };
       

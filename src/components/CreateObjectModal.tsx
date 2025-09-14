@@ -29,13 +29,17 @@ const CreateObjectModal: React.FC<CreateObjectModalProps> = ({ type, parentId, o
     setFormData(prev => ({ ...prev, [key]: value }));
   };
 
-  const containerFields = [
+  type Field =
+    | { key: string; label: string; type: 'text' | 'textarea'; required: boolean; placeholder?: string }
+    | { key: string; label: string; type: 'select'; required: boolean; options: string[]; placeholder?: string };
+
+  const containerFields: Field[] = [
     { key: 'name', label: 'Container Name', type: 'text', required: true },
     { key: 'description', label: 'Description', type: 'textarea', required: false },
     { key: 'category', label: 'Category', type: 'text', required: false }
   ];
 
-  const infoFields = [
+  const infoFields: Field[] = [
     { key: 'content', label: 'Content', type: 'text', required: true },
     { key: 'priority', label: 'Priority', type: 'select', options: ['Low', 'Medium', 'High'], required: false },
     { key: 'tags', label: 'Tags', type: 'text', placeholder: 'Comma separated', required: false }

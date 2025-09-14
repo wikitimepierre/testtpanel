@@ -1,3 +1,137 @@
+/* Classic CSS replacement for Tailwind utility classes used in the app */
 
-@import './classic.css';
-
+.control-panel {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  background: #fff;
+  border-top: 1px solid #d1d5db;
+  padding: 1rem;
+}
+.flex-center {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+.space-x-4 > * + * {
+  margin-left: 1rem;
+}
+.mt-3 {
+  margin-top: 0.75rem;
+}
+.btn {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.5rem 1rem;
+  border-radius: 0.375rem;
+  font: inherit;
+  cursor: pointer;
+  border: none;
+  transition: background 0.2s;
+}
+.btn-blue {
+  background: #3b82f6;
+  color: #fff;
+}
+.btn-blue:hover:not(:disabled) {
+  background: #2563eb;
+}
+.btn-red {
+  background: #ef4444;
+  color: #fff;
+}
+.btn-red:hover:not(:disabled) {
+  background: #dc2626;
+}
+.btn-green {
+  background: #22c55e;
+  color: #fff;
+}
+.btn-green:hover:not(:disabled) {
+  background: #16a34a;
+}
+.btn-purple {
+  background: #a21caf;
+  color: #fff;
+}
+.btn-purple:hover:not(:disabled) {
+  background: #86198f;
+}
+.btn-indigo {
+  background: #6366f1;
+  color: #fff;
+}
+.btn-indigo:hover:not(:disabled) {
+  background: #4f46e5;
+}
+.btn:disabled {
+  background: #d1d5db;
+  color: #6b7280;
+  cursor: not-allowed;
+}
+.btn-outline {
+  background: #fff;
+  color: #4b5563;
+  border: 1px solid #d1d5db;
+}
+.btn-outline:hover {
+  background: #f9fafb;
+}
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0,0,0,0.5);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 50;
+}
+.modal {
+  background: #fff;
+  border-radius: 0.5rem;
+  padding: 1.5rem;
+  width: 24rem;
+  max-width: 100%;
+}
+.modal-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 1rem;
+}
+.text-xl {
+  font-size: 1.25rem;
+  font-weight: 600;
+}
+.text-red {
+  color: #ef4444;
+}
+.label {
+  display: block;
+  font-size: 0.875rem;
+  font-weight: 500;
+  color: #374151;
+  margin-bottom: 0.25rem;
+}
+.input, .textarea, .select {
+  width: 100%;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid #d1d5db;
+  border-radius: 0.375rem;
+  outline: none;
+  transition: box-shadow 0.2s;
+}
+.input:focus, .textarea:focus, .select:focus {
+  box-shadow: 0 0 0 2px #3b82f6;
+}
+.mb-4 {
+  margin-bottom: 1rem;
+}
+.w-full {
+  width: 100%;
+}
+.h-full {
+  height: 100%;
+}
