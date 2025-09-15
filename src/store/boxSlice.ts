@@ -1,21 +1,12 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { BoxObject, AppState } from '../types';
 
-const generateRandomString = (length: number): string => {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
-  let result = '';
-  for (let i = 0; i < length; i++) {
-    result += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-  return result;
-};
-
 const generateInitialBoxes = (): BoxObject[] => {
-  const count = Math.floor(Math.random() * 6) + 5; // 5-10 boxes
+  const count = 8
   const boxes: BoxObject[] = [];
-  
+
   console.log('Generating', count, 'initial boxes');
-  
+
   for (let i = 0; i < count; i++) {
     boxes.push({
       id: `box-${i}`,
@@ -24,7 +15,7 @@ const generateInitialBoxes = (): BoxObject[] => {
       y: i * 35 + 50, // Stacked with 5px gap (30px height + 5px gap)
       width: Math.random() * 100 + 80, // Random width between 80-180
       height: 30,
-      text: generateRandomString(Math.floor(Math.random() * 16) + 5), // 5-20 chars
+      text: `box-${i}`,
       color: 'grey',
       stackOrder: i
     });
@@ -33,6 +24,7 @@ const generateInitialBoxes = (): BoxObject[] => {
   console.log('Generated boxes:', boxes);
   return boxes;
 };
+
 
 const initialState: AppState = {
   objects: generateInitialBoxes(),

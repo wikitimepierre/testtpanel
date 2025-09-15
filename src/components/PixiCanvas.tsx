@@ -104,12 +104,7 @@ const PixiCanvas: React.FC = () => {
       // Create text
       const text = new PIXI.Text({
         text: obj.text,
-        style: {
-          fontFamily: 'Arial',
-          fontSize: 12,
-          fill: 0x000000,
-          align: 'center',
-        }
+        style: {fontFamily: 'Arial',fontSize: 12,fill: 0x000000,align: 'center'}
       });
       // Center text horizontally and vertically in the box
       text.x = (obj.width - text.width) / 2;
@@ -155,7 +150,7 @@ const PixiCanvas: React.FC = () => {
             // This is a drag operation
           } else {
             // This is a click - toggle color
-            dispatch(colorToggle(obj.id));
+            // dispatch(colorToggle(obj.id));
           }
         }, 200);
       });
