@@ -53,49 +53,12 @@ const ControlPanel: React.FC = () => {
   return (
     <>
       <div className="control-panel">
-        <div className="flex-center space-x-4">
-          <button
-            onClick={handleUndo}
-            disabled={!canUndo}
-            className="btn btn-blue"
-          >
-            <span>Undo</span>
-          </button>
-          <button
-            onClick={handleRedo}
-            disabled={!canRedo}
-            className="btn btn-blue"
-          >
-            <span>Redo</span>
-          </button>
-          <button
-            onClick={handleDelete}
-            disabled={!activeObjectId}
-            className="btn btn-red"
-          >
-            <span>Delete</span>
-          </button>
-          <button
-            onClick={handleSave}
-            className="btn btn-green"
-          >
-            <span>Save</span>
-          </button>
-        </div>
-        <div className="flex-center space-x-4 mt-3">
-          <button
-            onClick={handleCreateContainer}
-            className="btn btn-purple"
-          >
-            <span>New Container</span>
-          </button>
-          <button
-            onClick={handleCreateInfo}
-            className="btn btn-indigo"
-          >
-            <span>New Info</span>
-          </button>
-        </div>
+        <button onClick={handleUndo} disabled={!canUndo}>Undo</button>
+        <button onClick={handleRedo} disabled={!canRedo}>Redo</button>
+        <button onClick={handleDelete} disabled={!activeObjectId}>Delete</button>
+        <button onClick={handleSave}>Save</button>
+        <button onClick={handleCreateContainer}>New Container</button>
+        <button onClick={handleCreateInfo}>New Info</button>
       </div>
       {showCreateModal.type && (
         <CreateObjectModal
