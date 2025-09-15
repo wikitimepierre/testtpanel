@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../hooks/redux';
-import { undo, redo, deleteObject, createContainer, createInfo } from '../store/boxSlice';
-import { Save, Undo2, Redo2, Trash2, Plus, FolderPlus, FileText } from 'lucide-react';
+import { undo, redo, deleteObject } from '../store/boxSlice';
+// Removed lucide-react icons; using text labels instead
 import CreateObjectModal from './CreateObjectModal';
 
 const ControlPanel: React.FC = () => {
@@ -59,7 +59,6 @@ const ControlPanel: React.FC = () => {
             disabled={!canUndo}
             className="btn btn-blue"
           >
-            <Undo2 size={18} />
             <span>Undo</span>
           </button>
           <button
@@ -67,7 +66,6 @@ const ControlPanel: React.FC = () => {
             disabled={!canRedo}
             className="btn btn-blue"
           >
-            <Redo2 size={18} />
             <span>Redo</span>
           </button>
           <button
@@ -75,14 +73,12 @@ const ControlPanel: React.FC = () => {
             disabled={!activeObjectId}
             className="btn btn-red"
           >
-            <Trash2 size={18} />
             <span>Delete</span>
           </button>
           <button
             onClick={handleSave}
             className="btn btn-green"
           >
-            <Save size={18} />
             <span>Save</span>
           </button>
         </div>
@@ -91,14 +87,12 @@ const ControlPanel: React.FC = () => {
             onClick={handleCreateContainer}
             className="btn btn-purple"
           >
-            <FolderPlus size={18} />
             <span>New Container</span>
           </button>
           <button
             onClick={handleCreateInfo}
             className="btn btn-indigo"
           >
-            <FileText size={18} />
             <span>New Info</span>
           </button>
         </div>

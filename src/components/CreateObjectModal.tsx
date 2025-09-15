@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import { useAppDispatch } from '../hooks/redux';
 import { createContainer, createInfo } from '../store/boxSlice';
-import { X } from 'lucide-react';
+// Removed lucide-react; using plain text for close button
 
 interface CreateObjectModalProps {
   type: 'container' | 'info';
@@ -52,8 +52,8 @@ const CreateObjectModal: React.FC<CreateObjectModalProps> = ({ type, parentId, o
       <div className="modal">
         <div className="modal-header">
           <h2 className="text-xl">Create New {type === 'container' ? 'Container' : 'Information Object'}</h2>
-          <button onClick={onClose} className="btn btn-outline">
-            <X size={24} />
+          <button onClick={onClose} className="btn btn-outline" aria-label="Close">
+            X
           </button>
         </div>
         <form onSubmit={handleSubmit}>
