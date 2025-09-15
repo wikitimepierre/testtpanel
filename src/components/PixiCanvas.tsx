@@ -1,7 +1,8 @@
 import React, { useRef, useEffect, useState, useCallback } from 'react';
 import * as PIXI from 'pixi.js';
 import { useAppDispatch, useAppSelector } from '../hooks/redux';
-import { setActiveObject, colorToggle, dragDrop } from '../store/boxSlice';
+import { setActiveObject, dragDrop } from '../store/boxSlice';
+// import { colorToggle } from '../store/boxSlice';
 
 const PixiCanvas: React.FC = () => {
   // Use a callback ref to guarantee the DOM node is available

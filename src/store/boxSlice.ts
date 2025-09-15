@@ -58,13 +58,13 @@ export const boxSlice = createSlice({
       state.activeObjectId = action.payload;
     },
     
-    colorToggle: (state, action: PayloadAction<string>) => {
-      saveToHistory(state);
-      const object = state.objects.find(obj => obj.id === action.payload);
-      if (object) {
-        object.color = object.color === 'grey' ? 'yellow' : 'grey';
-      }
-    },
+    // colorToggle: (state, action: PayloadAction<string>) => {
+    //   saveToHistory(state);
+    //   const object = state.objects.find(obj => obj.id === action.payload);
+    //   if (object) {
+    //     object.color = object.color === 'grey' ? 'yellow' : 'grey';
+    //   }
+    // },
     
     dragDrop: (state, action: PayloadAction<{ id: string; newStackOrder: number }>) => {
       saveToHistory(state);
@@ -102,20 +102,20 @@ export const boxSlice = createSlice({
         }
         state.objects = state.objects.filter(obj => obj.id !== id);
       };
-      
+
       deleteRecursively(action.payload);
-      
+
       if (state.activeObjectId === action.payload) {
         state.activeObjectId = null;
       }
-      
+
       // Re-order remaining objects
       const sortedObjects = state.objects
         .sort((a, b) => a.stackOrder - b.stackOrder)
         .map((obj, index) => ({ ...obj, stackOrder: index, y: index * 35 + 50 }));
       state.objects = sortedObjects;
     },
-    
+
     createContainer: (state, action: PayloadAction<{ parentId: string | null; properties: any }>) => {
       saveToHistory(state);
       const newContainer: BoxObject = {
@@ -131,28 +131,9 @@ export const boxSlice = createSlice({
         ...(action.payload.parentId ? { parentId: action.payload.parentId } : {}),
         stackOrder: state.objects.length
       };
-      
       state.objects.push(newContainer);
     },
-    
-    createInfo: (state, action: PayloadAction<{ parentId: string | null; properties: any }>) => {
-      saveToHistory(state);
-      const newInfo: BoxObject = {
-        id: `info-${Date.now()}`,
-        type: 'info',
-        x: Math.random() * 400 + 50,
-        y: state.objects.length * 35 + 50,
-        width: 100,
-        height: 30,
-        text: action.payload.properties.content || 'Info',
-        color: 'grey',
-        ...(action.payload.parentId ? { parentId: action.payload.parentId } : {}),
-        stackOrder: state.objects.length
-      };
-      
-      state.objects.push(newInfo);
-    },
-    
+
     undo: (state) => {
       if (state.historyIndex > 0) {
         state.historyIndex--;
@@ -177,11 +158,10 @@ export const boxSlice = createSlice({
 
 export const {
   setActiveObject,
-  colorToggle,
+  // colorToggle,
   dragDrop,
   deleteObject,
   createContainer,
-  createInfo,
   undo,
   redo,
   loadObjects

@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useAppDispatch } from '../hooks/redux';
-import { createContainer, createInfo } from '../store/boxSlice';
-// Removed lucide-react; using plain text for close button
+import { createContainer } from '../store/boxSlice';
 
 interface CreateObjectModalProps {
   type: 'container' | 'info';
@@ -16,11 +15,7 @@ const CreateObjectModal: React.FC<CreateObjectModalProps> = ({ type, parentId, o
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (type === 'container') {
-      dispatch(createContainer({ parentId, properties: formData }));
-    } else {
-      dispatch(createInfo({ parentId, properties: formData }));
-    }
+    dispatch(createContainer({ parentId, properties: formData }));
     
     onClose();
   };
