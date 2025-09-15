@@ -15,8 +15,8 @@ const PixiCanvas: React.FC = () => {
   const [appReady, setAppReady] = useState(false);
   const dispatch = useAppDispatch();
   const { objects, activeObjectId } = useAppSelector(state => state.boxes);
-  
-  const [isDragging, setIsDragging] = useState(false);
+
+  const [isPanelLineDragging, setIsPanelLineDragging] = useState(false);
   const [dragStartY, setDragStartY] = useState(0);
   const [dragObjectId, setDragObjectId] = useState<string | null>(null);
 
@@ -125,7 +125,7 @@ const PixiCanvas: React.FC = () => {
 
       // Hover effects
       container.on('pointerenter', () => {
-        if (!isDragging) {
+        if (!isPanelLineDragging) {
           box.clear();
           box.rect(0, 0, obj.width, obj.height);
           box.fill(0xFF0000); // Red on hover
@@ -134,7 +134,7 @@ const PixiCanvas: React.FC = () => {
       });
 
       container.on('pointerleave', () => {
-        if (!isDragging) {
+        if (!isPanelLineDragging) {
           box.clear();
           box.rect(0, 0, obj.width, obj.height);
           box.fill(obj.color === 'grey' ? 0xDDDDDD : 0xFFFF00);
@@ -145,13 +145,13 @@ const PixiCanvas: React.FC = () => {
       // Click events
       container.on('pointerdown', (event) => {
         dispatch(setActiveObject(obj.id));
-        setIsDragging(true);
+        setIsPanelLineDragging(true);
         setDragStartY(event.clientY);
         setDragObjectId(obj.id);
 
         // Start drag timer
         setTimeout(() => {
-          if (isDragging && dragObjectId === obj.id) {
+          if (isPanelLineDragging && dragObjectId === obj.id) {
             // This is a drag operation
           } else {
             // This is a click - toggle color
@@ -171,7 +171,7 @@ const PixiCanvas: React.FC = () => {
 
     // Global pointer events for drag handling
     const handlePointerMove = (event: PointerEvent) => {
-      if (isDragging && dragObjectId) {
+      if (isPanelLineDragging && dragObjectId) {
         const deltaY = event.clientY - dragStartY;
         // Visual feedback during drag
         const container = objectsRef.current.get(dragObjectId);
@@ -182,7 +182,7 @@ const PixiCanvas: React.FC = () => {
     };
 
     const handlePointerUp = () => {
-      if (isDragging && dragObjectId) {
+      if (isPanelLineDragging && dragObjectId) {
         const draggedObject = objects.find(o => o.id === dragObjectId);
         if (draggedObject) {
           const deltaY = window.event ? (window.event as any).clientY - dragStartY : 0;
@@ -195,7 +195,7 @@ const PixiCanvas: React.FC = () => {
         }
       }
 
-      setIsDragging(false);
+      setIsPanelLineDragging(false);
       setDragObjectId(null);
     };
 
@@ -206,7 +206,7 @@ const PixiCanvas: React.FC = () => {
       window.removeEventListener('pointermove', handlePointerMove);
       window.removeEventListener('pointerup', handlePointerUp);
     };
-  }, [objects, activeObjectId, isDragging, dragStartY, dragObjectId, dispatch, appReady]);
+  }, [objects, activeObjectId, isPanelLineDragging, dragStartY, dragObjectId, dispatch, appReady]);
 
   return <div ref={canvasRef} className="pixi-canvas-top" />;
 };
