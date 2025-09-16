@@ -2,7 +2,7 @@ import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { BoxObject, AppState } from '../types';
 
 const generateBox = (i: number): BoxObject => ({
-  id: `box-${i}`,
+  id: i,
   type: 'box',
   x: Math.random() * 400 + 50,
   y: i * 35 + 50,
@@ -50,19 +50,19 @@ export const boxSlice = createSlice({
   name: 'boxes',
   initialState,
   reducers: {
-    setActiveObject: (state, action: PayloadAction<string | null>) => {
+    setActiveObject: (state, action: PayloadAction<number | null>) => {
       state.activeObjectId = action.payload;
     },
-    
-    // colorToggle: (state, action: PayloadAction<string>) => {
-    //   saveToHistory(state);
-    //   const object = state.objects.find(obj => obj.id === action.payload);
-    //   if (object) {
-    //     object.color = object.color === 'grey' ? 'yellow' : 'grey';
-    //   }
-    // },
-    
-    dragDrop: (state, action: PayloadAction<{ id: string; newStackOrder: number }>) => {
+
+    colorToggle: (state, action: PayloadAction<number>) => {
+      saveToHistory(state);
+      const object = state.objects.find(obj => obj.id === action.payload);
+      if (object) {
+        object.color = object.color === 'grey' ? 'yellow' : 'grey';
+      }
+    },
+
+    dragDrop: (state, action: PayloadAction<{ id: number; newStackOrder: number }>) => {
       saveToHistory(state);
       const { id, newStackOrder } = action.payload;
       const object = state.objects.find(obj => obj.id === id);
@@ -89,9 +89,9 @@ export const boxSlice = createSlice({
       }
     },
     
-    deleteObject: (state, action: PayloadAction<string>) => {
+    deleteObject: (state, action: PayloadAction<number>) => {
       saveToHistory(state);
-      const deleteRecursively = (id: string) => {
+      const deleteRecursively = (id: number) => {
         const object = state.objects.find(obj => obj.id === id);
         if (object && object.children) {
           object.children.forEach(child => deleteRecursively(child.id));
@@ -112,10 +112,11 @@ export const boxSlice = createSlice({
       state.objects = sortedObjects;
     },
 
-    createContainer: (state, action: PayloadAction<{ parentId: string | null; properties: any }>) => {
+    createContainer: (state, action: PayloadAction<{ parentId: number | null; properties: any }>) => {
       saveToHistory(state);
+      const nextId = state.objects.length ? Math.max(...state.objects.map(o => o.id)) + 1 : 0;
       const newContainer: BoxObject = {
-        id: `container-${Date.now()}`,
+        id: nextId,
         type: 'container',
         x: Math.random() * 400 + 50,
         y: state.objects.length * 35 + 50,

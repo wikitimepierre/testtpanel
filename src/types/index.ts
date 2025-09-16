@@ -1,5 +1,5 @@
 export interface BoxObject {
-  id: string;
+  id: number;
   type: 'box' | 'container' | 'info';
   x: number;
   y: number;
@@ -8,13 +8,13 @@ export interface BoxObject {
   text: string;
   color: 'grey' | 'yellow';
   children?: BoxObject[];
-  parentId?: string;
+  parentId?: number;
   stackOrder: number;
 }
 
 export interface AppState {
   objects: BoxObject[];
-  activeObjectId: string | null;
+  activeObjectId: number | null;
   history: BoxObject[][];
   historyIndex: number;
 }

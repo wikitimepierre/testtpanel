@@ -4,7 +4,7 @@ import { createContainer } from '../store/boxSlice';
 
 interface CreateObjectModalProps {
   type: 'container' | 'info';
-  parentId: string | null;
+  parentId: number | null;
   onClose: () => void;
 }
 
@@ -46,17 +46,17 @@ const CreateObjectModal: React.FC<CreateObjectModalProps> = ({ type, parentId, o
     <div className="modal-backdrop">
       <div className="modal">
         <div className="modal-header">
-          <h2 className="text-xl">Create New {type === 'container' ? 'Container' : 'Information Object'}</h2>
+          <h2>Create New {type === 'container' ? 'Container' : 'Information Object'}</h2>
           <button onClick={onClose} aria-label="Close">
             X
           </button>
         </div>
         <form onSubmit={handleSubmit}>
           {fields.map(field => (
-            <div key={field.key} className="mb-4">
+            <div key={field.key}>
               <label className="label">
                 {field.label}
-                {field.required && <span className="text-red">*</span>}
+                {field.required && <span>*</span>}
               </label>
               {field.type === 'textarea' ? (
                 <textarea

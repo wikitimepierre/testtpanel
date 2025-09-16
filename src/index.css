@@ -47,6 +47,9 @@
 .text-red {
   color: #ef4444;
 }
+.mb-4 {
+  margin-bottom: 1rem;
+}
 .label {
   display: block;
   font-size: 0.875rem;
@@ -61,9 +64,6 @@
 }
 .input:focus, .textarea:focus, .select:focus {
   box-shadow: 0 0 0 2px #3b82f6;
-}
-.mb-4 {
-  margin-bottom: 1rem;
 }
 .pixi-canvas-top {
   position: fixed;

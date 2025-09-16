@@ -12,14 +12,14 @@ const PixiCanvas: React.FC = () => {
     setContainerNode(node);
   }, []);
   const appRef = useRef<PIXI.Application | null>(null);
-  const objectsRef = useRef<Map<string, PIXI.Container>>(new Map());
+  const objectsRef = useRef<Map<number, PIXI.Container>>(new Map());
   const [appReady, setAppReady] = useState(false);
   const dispatch = useAppDispatch();
   const { objects, activeObjectId } = useAppSelector(state => state.boxes);
 
   const [isPanelLineDragging, setIsPanelLineDragging] = useState(false);
   const [dragStartY, setDragStartY] = useState(0);
-  const [dragObjectId, setDragObjectId] = useState<string | null>(null);
+  const [dragObjectId, setDragObjectId] = useState<number | null>(null);
 
   // Debug logging
   console.log('PixiCanvas render - objects:', objects);
@@ -167,7 +167,7 @@ const PixiCanvas: React.FC = () => {
 
     // Global pointer events for drag handling
     const handlePointerMove = (event: PointerEvent) => {
-      if (isPanelLineDragging && dragObjectId) {
+      if (isPanelLineDragging && dragObjectId !== null) {
         const deltaY = event.clientY - dragStartY;
         // Visual feedback during drag
         const container = objectsRef.current.get(dragObjectId);
@@ -177,11 +177,11 @@ const PixiCanvas: React.FC = () => {
       }
     };
 
-    const handlePointerUp = () => {
-      if (isPanelLineDragging && dragObjectId) {
+    const handlePointerUp = (event: PointerEvent) => {
+      if (isPanelLineDragging && dragObjectId !== null) {
         const draggedObject = objects.find(o => o.id === dragObjectId);
         if (draggedObject) {
-          const deltaY = window.event ? (window.event as any).clientY - dragStartY : 0;
+          const deltaY = event.clientY - dragStartY;
           const newStackOrder = Math.max(0, Math.min(objects.length - 1,
             Math.round(deltaY / 35) + draggedObject.stackOrder));
 
