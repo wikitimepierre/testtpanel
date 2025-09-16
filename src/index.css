@@ -5,73 +5,15 @@
   bottom: 0;
   left: 0;
   right: 0;
-  background: #fff;
-  border-top: 1px solid #d1d5db;
-  z-index: 2; /* ensure buttons overlay the canvas */
-}
-.flex-center {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-.space-x-4 > * + * {
-  margin-left: 1rem;
-}
-/* Button utility classes removed (no longer used) */
-.modal-backdrop {
-  position: fixed;
-  inset: 0;
-  background: rgba(0,0,0,0.5);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  z-index: 50;
-}
-.modal {
-  background: #fff;
-  border-radius: 0.5rem;
-  padding: 1.5rem;
-  width: 24rem;
-  max-width: 100%;
-}
-.modal-header {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  margin-bottom: 1rem;
-}
-.text-xl {
-  font-size: 1.25rem;
-  font-weight: 600;
-}
-.text-red {
-  color: #ef4444;
-}
-.mb-4 {
-  margin-bottom: 1rem;
-}
-.label {
-  display: block;
-  font-size: 0.875rem;
-  font-weight: 500;
-  color: #374151;
-  margin-bottom: 0.25rem;
-}
-.input, .textarea, .select {
-  width: 100%;
-  outline: none;
-  transition: box-shadow 0.2s;
-}
-.input:focus, .textarea:focus, .select:focus {
-  box-shadow: 0 0 0 2px #3b82f6;
+  background: #9c8de0;
+  border-top: 1px solid #f00fac;
+  z-index: 2;
 }
 .pixi-canvas-top {
   position: fixed;
   top: 0;
   left: 0;
-  width: 100vw;
-  height: 100vh;
   margin: 0;
   padding: 0;
-  z-index: 0; /* sit behind UI */
+  z-index: 0;
 }
