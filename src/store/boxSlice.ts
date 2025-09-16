@@ -22,11 +22,12 @@ const generateInitialBoxes = (): BoxObject[] => {
   return boxes;
 };
 
+const initialObjects = generateInitialBoxes();
 const initialState: AppState = {
-  objects: generateInitialBoxes(),
+  objects: initialObjects,
   activeObjectId: null,
-  history: [],
-  historyIndex: -1
+  history: [JSON.parse(JSON.stringify(initialObjects))],
+  historyIndex: 0
 };
 
 const saveToHistory = (state: AppState) => {
@@ -55,24 +56,23 @@ export const boxSlice = createSlice({
     },
 
     colorToggle: (state, action: PayloadAction<number>) => {
-      saveToHistory(state);
       const object = state.objects.find(obj => obj.id === action.payload);
       if (object) {
         object.color = object.color === 'grey' ? 'yellow' : 'grey';
+        saveToHistory(state);
       }
     },
 
     // Create a new simple box with id = max id + 1 and appended to the end
     generateBox: (state) => {
-      saveToHistory(state);
       const nextId = state.objects.length ? Math.max(...state.objects.map(o => o.id)) + 1 : 0;
       const stackIndex = state.objects.length;
       const newBox = buildBox(nextId, stackIndex);
       state.objects.push(newBox);
+      saveToHistory(state);
     },
 
     dragDrop: (state, action: PayloadAction<{ id: number; newStackOrder: number }>) => {
-      saveToHistory(state);
       const { id, newStackOrder } = action.payload;
       const object = state.objects.find(obj => obj.id === id);
       
@@ -95,11 +95,11 @@ export const boxSlice = createSlice({
         sortedObjects.forEach((obj, index) => {
           obj.y = index * 35 + 50;
         });
+        saveToHistory(state);
       }
     },
     
     deleteObject: (state, action: PayloadAction<number>) => {
-      saveToHistory(state);
       const deleteRecursively = (id: number) => {
         const object = state.objects.find(obj => obj.id === id);
         if (object && object.children) {
@@ -119,10 +119,10 @@ export const boxSlice = createSlice({
         .sort((a, b) => a.stackOrder - b.stackOrder)
         .map((obj, index) => ({ ...obj, stackOrder: index, y: index * 35 + 50 }));
       state.objects = sortedObjects;
+      saveToHistory(state);
     },
 
     createContainer: (state, action: PayloadAction<{ parentId: number | null; properties: any }>) => {
-      saveToHistory(state);
       const nextId = state.objects.length ? Math.max(...state.objects.map(o => o.id)) + 1 : 0;
       const newContainer: BoxObject = {
         id: nextId,
@@ -138,6 +138,7 @@ export const boxSlice = createSlice({
         stackOrder: state.objects.length
       };
       state.objects.push(newContainer);
+      saveToHistory(state);
     },
 
     undo: (state) => {
@@ -156,8 +157,9 @@ export const boxSlice = createSlice({
     
     loadObjects: (state, action: PayloadAction<BoxObject[]>) => {
       state.objects = action.payload;
-      state.history = [];
-      state.historyIndex = -1;
+      const baseline = JSON.parse(JSON.stringify(action.payload));
+      state.history = [baseline];
+      state.historyIndex = 0;
     }
   }
 });
