@@ -1,33 +1,23 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { BoxObject, AppState } from '../types';
 
-// Simple monotonic id generator used for initial box creation
-let __nextBoxId = -1;
-const __getNextBoxId = () => {
-  __nextBoxId += 1;
-  return __nextBoxId;
-};
-
-const generateBox = (): BoxObject => {
-  const id = __getNextBoxId();
-  return {
-    id,
-    type: 'box',
-    x: Math.random() * 400 + 50,
-    y: id * 35 + 50,
-    width: Math.random() * 100 + 80,
-    height: 30,
-    text: `box-${id}`,
-    color: 'grey',
-    stackOrder: id
-  };
-};
+const buildBox = (id: number, stackIndex: number): BoxObject => ({
+  id,
+  type: 'box',
+  x: Math.random() * 400 + 50,
+  y: stackIndex * 35 + 50,
+  width: Math.random() * 100 + 80,
+  height: 30,
+  text: `box-${id}`,
+  color: 'grey',
+  stackOrder: stackIndex
+});
 
 const generateInitialBoxes = (): BoxObject[] => {
-  const count = 8
+  const count = 8;
   const boxes: BoxObject[] = [];
   for (let i = 0; i < count; i++) {
-    boxes.push(generateBox());
+    boxes.push(buildBox(i, i));
   }
   return boxes;
 };
@@ -70,6 +60,15 @@ export const boxSlice = createSlice({
       if (object) {
         object.color = object.color === 'grey' ? 'yellow' : 'grey';
       }
+    },
+
+    // Create a new simple box with id = max id + 1 and appended to the end
+    generateBox: (state) => {
+      saveToHistory(state);
+      const nextId = state.objects.length ? Math.max(...state.objects.map(o => o.id)) + 1 : 0;
+      const stackIndex = state.objects.length;
+      const newBox = buildBox(nextId, stackIndex);
+      state.objects.push(newBox);
     },
 
     dragDrop: (state, action: PayloadAction<{ id: number; newStackOrder: number }>) => {
@@ -166,6 +165,7 @@ export const boxSlice = createSlice({
 export const {
   setActiveObject,
   // colorToggle,
+  generateBox,
   dragDrop,
   deleteObject,
   createContainer,

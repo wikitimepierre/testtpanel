@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useAppDispatch, useAppSelector } from '../hooks/redux';
-import { undo, redo, deleteObject } from '../store/boxSlice';
+import { undo, redo, deleteObject, generateBox } from '../store/boxSlice';
 // Removed lucide-react icons; using text labels instead
 import CreateObjectModal from './CreateObjectModal';
 
@@ -12,7 +12,7 @@ const ControlPanel: React.FC = () => {
   const handleUndo = () => {dispatch(undo())};
   const handleRedo = () => {dispatch(redo())};
   const handleDelete = () => {if (activeObjectId !== null) {dispatch(deleteObject(activeObjectId))}};
-  const handleNew = () => {setShowCreateModal({ type: 'container' })};
+  const handleNew = () => {dispatch(generateBox())};
 
   const canUndo = historyIndex > 0;
   const canRedo = historyIndex < history.length - 1;
