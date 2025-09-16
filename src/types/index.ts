@@ -13,13 +13,8 @@ export interface BoxObject {
 }
 
 export interface AppState {
-  objects: BoxObject[];
   activeObjectId: number | null;
-  history: BoxObject[][];
   historyIndex: number;
-}
-
-export interface CreateObjectForm {
-  type: 'container' | 'info';
-  show: boolean;
+  objects: BoxObject[];
+  history: BoxObject[][];
 }
