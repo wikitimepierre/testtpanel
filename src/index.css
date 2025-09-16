@@ -17,68 +17,7 @@
 .space-x-4 > * + * {
   margin-left: 1rem;
 }
-.mt-3 {
-  margin-top: 0.75rem;
-}
-.btn {
-  display: flex;
-  align-items: center;
-  gap: 0.5rem;
-  padding: 0.5rem 1rem;
-  border-radius: 0.375rem;
-  font: inherit;
-  cursor: pointer;
-  border: none;
-  transition: background 0.2s;
-}
-.btn-blue {
-  background: #3b82f6;
-  color: #fff;
-}
-.btn-blue:hover:not(:disabled) {
-  background: #2563eb;
-}
-.btn-red {
-  background: #ef4444;
-  color: #fff;
-}
-.btn-red:hover:not(:disabled) {
-  background: #dc2626;
-}
-.btn-green {
-  background: #22c55e;
-  color: #fff;
-}
-.btn-green:hover:not(:disabled) {
-  background: #16a34a;
-}
-.btn-purple {
-  background: #a21caf;
-  color: #fff;
-}
-.btn-purple:hover:not(:disabled) {
-  background: #86198f;
-}
-.btn-indigo {
-  background: #6366f1;
-  color: #fff;
-}
-.btn-indigo:hover:not(:disabled) {
-  background: #4f46e5;
-}
-.btn:disabled {
-  background: #d1d5db;
-  color: #6b7280;
-  cursor: not-allowed;
-}
-.btn-outline {
-  background: #fff;
-  color: #4b5563;
-  border: 1px solid #d1d5db;
-}
-.btn-outline:hover {
-  background: #f9fafb;
-}
+/* Button utility classes removed (no longer used) */
 .modal-backdrop {
   position: fixed;
   inset: 0;

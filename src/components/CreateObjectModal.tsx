@@ -47,7 +47,7 @@ const CreateObjectModal: React.FC<CreateObjectModalProps> = ({ type, parentId, o
       <div className="modal">
         <div className="modal-header">
           <h2 className="text-xl">Create New {type === 'container' ? 'Container' : 'Information Object'}</h2>
-          <button onClick={onClose} className="btn btn-outline" aria-label="Close">
+          <button onClick={onClose} aria-label="Close">
             X
           </button>
         </div>
@@ -90,17 +90,15 @@ const CreateObjectModal: React.FC<CreateObjectModalProps> = ({ type, parentId, o
               )}
             </div>
           ))}
-          <div className="flex-center space-x-3">
+          <div className="flex-center space-x-4">
             <button
               type="button"
               onClick={onClose}
-              className="btn btn-outline"
             >
               Cancel
             </button>
             <button
               type="submit"
-              className="btn btn-blue"
             >
               Create
             </button>
