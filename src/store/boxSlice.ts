@@ -1,23 +1,33 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { BoxObject, AppState } from '../types';
 
-const generateBox = (i: number): BoxObject => ({
-  id: i,
-  type: 'box',
-  x: Math.random() * 400 + 50,
-  y: i * 35 + 50,
-  width: Math.random() * 100 + 80,
-  height: 30,
-  text: `box-${i}`,
-  color: 'grey',
-  stackOrder: i
-});
+// Simple monotonic id generator used for initial box creation
+let __nextBoxId = -1;
+const __getNextBoxId = () => {
+  __nextBoxId += 1;
+  return __nextBoxId;
+};
+
+const generateBox = (): BoxObject => {
+  const id = __getNextBoxId();
+  return {
+    id,
+    type: 'box',
+    x: Math.random() * 400 + 50,
+    y: id * 35 + 50,
+    width: Math.random() * 100 + 80,
+    height: 30,
+    text: `box-${id}`,
+    color: 'grey',
+    stackOrder: id
+  };
+};
 
 const generateInitialBoxes = (): BoxObject[] => {
   const count = 8
   const boxes: BoxObject[] = [];
   for (let i = 0; i < count; i++) {
-    boxes.push(generateBox(i));
+    boxes.push(generateBox());
   }
   return boxes;
 };
