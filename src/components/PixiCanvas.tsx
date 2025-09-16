@@ -21,6 +21,11 @@ const PixiCanvas: React.FC = () => {
   const [dragStartY, setDragStartY] = useState(0);
   const [dragObjectId, setDragObjectId] = useState<number | null>(null);
 
+  const canvasWidth = 1500;
+  const canvasHeight = 1000;
+  const rowHeight = 35;
+  const fullWidth = appRef.current ? appRef.current.renderer.width : canvasWidth; // entire line: from left edge of canvas across full width
+
   // Debug logging
   console.log('PixiCanvas render - objects:', objects);
   console.log('PixiCanvas render - appRef.current:', appRef.current);
@@ -31,8 +36,8 @@ const PixiCanvas: React.FC = () => {
       console.log('PixiCanvas: Initializing PIXI app...');
       const app = new PIXI.Application();
       app.init({
-        width: 1500,
-        height: 1000,
+        width: canvasWidth,
+        height: canvasHeight,
         backgroundColor: 0x00FF00,
         backgroundAlpha: 1
       }).then(() => {
@@ -64,18 +69,10 @@ const PixiCanvas: React.FC = () => {
   }, [containerNode]);
 
   useEffect(() => {
-    if (!appRef.current) {
-      console.log('No PIXI app available');
-      return;
-    }
-
-    console.log('PixiCanvas objects array:', objects);
-    if (objects.length === 0) {
-      console.log('No objects to render');
-      return;
-    }
-
-    console.log('Rendering', objects.length, 'objects');
+    if (!appRef.current) {return}// console.log('No PIXI app available');
+    // console.log('PixiCanvas objects array:', objects);
+    if (objects.length === 0) {return}// console.log('No objects to render');
+    // console.log('Rendering', objects.length, 'objects');
 
     // Clear existing objects
     objectsRef.current.forEach(container => {
@@ -87,20 +84,26 @@ const PixiCanvas: React.FC = () => {
 
     // Create objects
     objects.forEach(obj => {
-      console.log('Creating object:', obj);
-
+      // console.log('Creating object:', obj);
       const container = new PIXI.Container();
       container.x = obj.x;
       container.y = obj.y;
 
-  // Create box graphics (Pixi v8 API)
-  const box = new PIXI.Graphics();
-  const baseFill = obj.color === 'grey' ? 0xDDDDDD : 0xFFFF00;
-  const strokeWidth = obj.id === activeObjectId ? 3 : 2;
-  box.clear();
-  box.rect(0, 0, obj.width, obj.height);
-  box.fill(baseFill);
-  box.stroke({ width: strokeWidth, color: 0x000000 });
+      // Hover background (behind the box)
+      const hoverBg = new PIXI.Graphics();
+      hoverBg.clear();
+      hoverBg.rect(-container.x,-4, fullWidth, rowHeight+4); // Start at -container.x so it aligns to canvas left in world space
+      hoverBg.fill(0x0000FF); hoverBg.alpha = 0.2;
+      hoverBg.visible = false;
+
+      // Create box graphics (Pixi v8 API)
+      const box = new PIXI.Graphics();
+      const baseFill = obj.color === 'grey' ? 0xDDDDDD : 0xFFFF00;
+      const strokeWidth = obj.id === activeObjectId ? 3 : 2;
+      box.clear();
+      box.rect(0, 0, obj.width, obj.height);
+      box.fill(baseFill);
+      box.stroke({ width: strokeWidth, color: 0x000000 });
 
       // Create text
       const text = new PIXI.Text({
@@ -111,30 +114,26 @@ const PixiCanvas: React.FC = () => {
       text.x = (obj.width - text.width) / 2;
       text.y = (obj.height - text.height) / 2;
 
+      // Ensure hover background is behind the box and text
+      container.addChild(hoverBg);
       container.addChild(box);
       container.addChild(text);
-      console.log('Created container at', container.x, container.y, 'with dimensions', obj.width, 'x', obj.height);
+      // console.log('Created container at', container.x, container.y, 'with dimensions', obj.width, 'x', obj.height);
 
       // Make interactive
       container.eventMode = 'static';
       container.cursor = 'pointer';
 
-      // Hover effects
+      // Hover effects: show a blue background behind the box + change box border to blue
       container.on('pointerenter', () => {
         if (!isPanelLineDragging) {
-          box.clear();
-          box.rect(0, 0, obj.width, obj.height);
-          box.fill(0xFF0000); // Red on hover
-          box.stroke({ width: 2, color: 0x000000 });
+          hoverBg.visible = true;
+          box.stroke({ width: 2, color: 0x0000FF });
         }
       });
-
       container.on('pointerleave', () => {
         if (!isPanelLineDragging) {
-          box.clear();
-          box.rect(0, 0, obj.width, obj.height);
-          box.fill(obj.color === 'grey' ? 0xDDDDDD : 0xFFFF00);
-          box.stroke({ width: obj.id === activeObjectId ? 3 : 2, color: 0x000000 });
+          hoverBg.visible = false;
         }
       });
 
@@ -144,6 +143,8 @@ const PixiCanvas: React.FC = () => {
         setIsPanelLineDragging(true);
         setDragStartY(event.clientY);
         setDragObjectId(obj.id);
+        // Hide hover highlight when starting a drag
+        hoverBg.visible = false;
 
         // Start drag timer
         setTimeout(() => {
@@ -158,10 +159,7 @@ const PixiCanvas: React.FC = () => {
 
       // Active object styling already applied via strokeWidth above
 
-      if (appRef.current) {
-        appRef.current.stage.addChild(container);
-        console.log('Added container to stage, stage children count:', appRef.current.stage.children.length);
-      }
+      if (appRef.current) {appRef.current.stage.addChild(container)} //console.log('Added container to stage, stage children count:', appRef.current.stage.children.length);
       objectsRef.current.set(obj.id, container);
     });
 
@@ -169,11 +167,8 @@ const PixiCanvas: React.FC = () => {
     const handlePointerMove = (event: PointerEvent) => {
       if (isPanelLineDragging && dragObjectId !== null) {
         const deltaY = event.clientY - dragStartY;
-        // Visual feedback during drag
-        const container = objectsRef.current.get(dragObjectId);
-        if (container) {
-          container.y = objects.find(o => o.id === dragObjectId)!.y + deltaY;
-        }
+        const container = objectsRef.current.get(dragObjectId); // Visual feedback during drag
+        if (container) {container.y = objects.find(o => o.id === dragObjectId)!.y + deltaY}
       }
     };
 
@@ -183,11 +178,8 @@ const PixiCanvas: React.FC = () => {
         if (draggedObject) {
           const deltaY = event.clientY - dragStartY;
           const newStackOrder = Math.max(0, Math.min(objects.length - 1,
-            Math.round(deltaY / 35) + draggedObject.stackOrder));
-
-          if (newStackOrder !== draggedObject.stackOrder) {
-            dispatch(dragDrop({ id: dragObjectId, newStackOrder }));
-          }
+          Math.round(deltaY / 35) + draggedObject.stackOrder));
+          if (newStackOrder !== draggedObject.stackOrder) {dispatch(dragDrop({ id: dragObjectId, newStackOrder }))}
         }
       }
 
