@@ -4,9 +4,9 @@ import { BoxObject, AppState } from '../types';
 const buildBox = (id: number, stackIndex: number): BoxObject => ({
   id,
   type: 'box',
-  x: Math.random() * 400 + 50,
-  y: stackIndex * 35 + 50,
-  width: Math.random() * 100 + 80,
+  x: Math.random() * 400,
+  y: stackIndex * 35,
+  width: 80 + Math.random() * 100,
   height: 30,
   text: `box-${id}`,
   color: 'grey',

@@ -21,10 +21,10 @@ const TimePanel: React.FC = () => {
   const [dragStartY, setDragStartY] = useState(0);
   const [dragObjectId, setDragObjectId] = useState<number | null>(null);
 
-  const canvasWidth = 1500;
-  const canvasHeight = 1000;
-  const rowHeight = 35;
-  const fullWidth = appRef.current ? appRef.current.renderer.width : canvasWidth; // entire line: from left edge of canvas across full width
+  const canvasTimePanelWidth = 550;
+  const canvasTimePanelHeight = 500;
+  const timeObjectHeight = 35;
+  const fullWidth = appRef.current ? appRef.current.renderer.width : canvasTimePanelWidth; // entire line: from left edge of canvas across full width
 
   // Debug logging
   console.log('TimePanel render - objects:', objects);
@@ -32,16 +32,14 @@ const TimePanel: React.FC = () => {
   useEffect(() => {
     let destroyed = false;
     if (!containerNode) return;
-    if (!appRef.current) {
-      console.log('TimePanel: Initializing PIXI app...');
+    if (!appRef.current) {//console.log('TimePanel: Initializing PIXI app...');
       const app = new PIXI.Application();
       app.init({
-        width: canvasWidth,
-        height: canvasHeight,
-        backgroundColor: 0x00FF00,
-        backgroundAlpha: 1
-      }).then(() => {
-        console.log('TimePanel: PIXI app initialized! destroyed:', destroyed, 'containerNode:', containerNode);
+        width: canvasTimePanelWidth,
+        height: canvasTimePanelHeight,
+        backgroundColor: 0xFFA500,
+        backgroundAlpha: .5
+      }).then(() => {//console.log('TimePanel: PIXI app initialized! destroyed:', destroyed, 'containerNode:', containerNode);
         if (destroyed) {
           app.destroy();
           return;
@@ -53,10 +51,7 @@ const TimePanel: React.FC = () => {
         } else {
           app.destroy();
         }
-      }).catch((error) => {
-        console.error('Failed to initialize PIXI application:', error);
-        app.destroy();
-      });
+      }).catch((error) => {app.destroy()});//console.error('Failed to initialize PIXI application:', error);
     }
     return () => {
       destroyed = true;
@@ -92,7 +87,7 @@ const TimePanel: React.FC = () => {
       // Hover background (behind the box)
       const hoverBg = new PIXI.Graphics();
       hoverBg.clear();
-      hoverBg.rect(-container.x,-4, fullWidth, rowHeight+4); // Start at -container.x so it aligns to canvas left in world space
+      hoverBg.rect(-container.x,-4, fullWidth, timeObjectHeight+4); // Start at -container.x so it aligns to canvas left in world space
       hoverBg.fill(0x0000FF); hoverBg.alpha = 0.2;
       hoverBg.visible = false;
 
