@@ -28,36 +28,30 @@ const TimePanel: React.FC = () => {
   console.log('TimePanel render - objects:', objects);
   console.log('TimePanel render - appRef.current:', appRef.current);
   useEffect(() => {
-    let destroyed = false;
     if (!containerNodeRef.current) return;
-    if (!appRef.current) {//console.log('TimePanel: Initializing PIXI app...');
+    // Only create PIXI app and canvas if not already present
+    if (!appRef.current) {
       const app = new PIXI.Application();
       app.init({
         width: canvasTimePanelWidth,
         height: canvasTimePanelHeight,
         backgroundColor: 0xFFA500,
         backgroundAlpha: .5
-      }).then(() => {//console.log('TimePanel: PIXI app initialized! destroyed:', destroyed, 'containerNode:', containerNode);
-        if (destroyed) {
-          app.destroy();
-          return;
-        }
-        if (containerNodeRef.current) {
+      }).then(() => {
+        if (containerNodeRef.current && !containerNodeRef.current.contains(app.canvas)) {
           containerNodeRef.current.appendChild(app.canvas);
-          appRef.current = app;
-          setAppReady(true);
-        } else {
-          app.destroy();
         }
-      }).catch(() => {app.destroy()});//console.error('Failed to initialize PIXI application:', error);
+        appRef.current = app;
+        setAppReady(true);
+      }).catch(() => {app.destroy();});
+    } else {
+      // If canvas already exists, ensure it's still in the container
+      if (containerNodeRef.current && appRef.current.canvas && !containerNodeRef.current.contains(appRef.current.canvas)) {
+        containerNodeRef.current.appendChild(appRef.current.canvas);
+      }
     }
     return () => {
-      destroyed = true;
-      if (appRef.current && typeof appRef.current.destroy === 'function') {
-        appRef.current.destroy();
-        appRef.current = null;
-        setAppReady(false);
-      }
+      // Optionally, cleanup listeners or other resources here
     };
   }, []);
 

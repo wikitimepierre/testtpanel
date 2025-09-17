@@ -1,5 +1,11 @@
-/* Classic CSS replacement for Tailwind utility classes used in the app */
-
+.pixi-canvas-top {
+  position: fixed;
+  top: 0;
+  left: 0;
+  margin: 0;
+  padding: 0;
+  z-index: 0;
+}
 .control-panel {
   position: fixed;
   bottom: 0;
@@ -8,12 +14,4 @@
   background: #9c8de0;
   border-top: 1px solid #f00fac;
   z-index: 2;
-}
-.pixi-canvas-top {
-  position: fixed;
-  top: 0;
-  left: 0;
-  margin: 0;
-  padding: 0;
-  z-index: 0;
 }

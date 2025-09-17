@@ -19,7 +19,7 @@ const buildBox = (id: number): BoxObject => ({
 });
 
 const generateInitialBoxes = (): BoxObject[] => {
-  const count = 3;
+  const count = 8;
   const boxes: BoxObject[] = [];
   for (let i = 0; i < count; i++) {
     boxes.push(buildBox(i));
