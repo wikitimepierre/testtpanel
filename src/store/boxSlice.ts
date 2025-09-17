@@ -1,23 +1,28 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { BoxObject, AppState } from '../types';
 
-const buildBox = (id: number, stackIndex: number): BoxObject => ({
+const panelLineHeight = 35;
+
+// TODOnow: hover a line with a box highlights the entire line
+// TODOnow: click a line with a box selects the box in it
+
+const buildBox = (id: number): BoxObject => ({
   id,
   type: 'box',
   x: Math.random() * 400,
-  y: stackIndex * 35,
+  y: id * panelLineHeight,
   width: 80 + Math.random() * 100,
   height: 30,
   text: `box-${id}`,
   color: 'grey',
-  stackOrder: stackIndex
+  stackOrder: id
 });
 
 const generateInitialBoxes = (): BoxObject[] => {
-  const count = 8;
+  const count = 3;
   const boxes: BoxObject[] = [];
   for (let i = 0; i < count; i++) {
-    boxes.push(buildBox(i, i));
+    boxes.push(buildBox(i));
   }
   return boxes;
 };
@@ -63,11 +68,9 @@ export const boxSlice = createSlice({
     //   }
     // },
 
-    // Create a new simple box with id = max id + 1 and appended to the end
     generateBox: (state) => {
-      const nextId = state.objects.length ? Math.max(...state.objects.map(o => o.id)) + 1 : 0;
-      const stackIndex = state.objects.length;
-      const newBox = buildBox(nextId, stackIndex);
+      const nextId = state.objects.length;
+      const newBox = buildBox(nextId);
       state.objects.push(newBox);
       saveToHistory(state);
     },
@@ -98,7 +101,7 @@ export const boxSlice = createSlice({
         saveToHistory(state);
       }
     },
-    
+
     deleteObject: (state, action: PayloadAction<number>) => {
       const deleteRecursively = (id: number) => {
         const object = state.objects.find(obj => obj.id === id);
@@ -155,25 +158,25 @@ export const boxSlice = createSlice({
       }
     },
     
-    loadObjects: (state, action: PayloadAction<BoxObject[]>) => {
-      state.objects = action.payload;
-      const baseline = JSON.parse(JSON.stringify(action.payload));
-      state.history = [baseline];
-      state.historyIndex = 0;
-    }
+    // loadObjects: (state, action: PayloadAction<BoxObject[]>) => {
+    //   state.objects = action.payload;
+    //   const baseline = JSON.parse(JSON.stringify(action.payload));
+    //   state.history = [baseline];
+    //   state.historyIndex = 0;
+    // }
   }
 });
 
 export const {
   setActiveObject,
   // colorToggle,
+  // loadObjects,
   generateBox,
   dragDrop,
   deleteObject,
   createContainer,
   undo,
   redo,
-  loadObjects
 } = boxSlice.actions;
 
 export default boxSlice.reducer;

@@ -23,8 +23,10 @@ const TimePanel: React.FC = () => {
 
   const canvasTimePanelWidth = 550;
   const canvasTimePanelHeight = 500;
-  const timeObjectHeight = 35;
+  const panelLineHeight = 35;
   const fullWidth = appRef.current ? appRef.current.renderer.width : canvasTimePanelWidth; // entire line: from left edge of canvas across full width
+  const timeBoxBorder = 2;
+  const timeBoxActiveBorder = 5;
 
   // Debug logging
   console.log('TimePanel render - objects:', objects);
@@ -87,14 +89,14 @@ const TimePanel: React.FC = () => {
       // Hover background (behind the box)
       const hoverBg = new PIXI.Graphics();
       hoverBg.clear();
-      hoverBg.rect(-container.x,-4, fullWidth, timeObjectHeight+4); // Start at -container.x so it aligns to canvas left in world space
+      hoverBg.rect(-container.x,-4, fullWidth, panelLineHeight + 4); // Start at -container.x so it aligns to canvas left in world space
       hoverBg.fill(0x0000FF); hoverBg.alpha = 0.2;
       hoverBg.visible = false;
 
       // Create box graphics (Pixi v8 API)
       const box = new PIXI.Graphics();
       const baseFill = obj.color === 'grey' ? 0xDDDDDD : 0xFFFF00;
-      const strokeWidth = obj.id === activeObjectId ? 3 : 2;
+      const strokeWidth = obj.id === activeObjectId ? timeBoxActiveBorder : timeBoxBorder;
       box.clear();
       box.rect(0, 0, obj.width, obj.height);
       box.fill(baseFill);
@@ -105,9 +107,8 @@ const TimePanel: React.FC = () => {
         text: obj.text,
         style: {fontFamily: 'Arial',fontSize: 12,fill: 0x000000,align: 'center'}
       });
-      // Center text horizontally and vertically in the box
-      text.x = (obj.width - text.width) / 2;
-      text.y = (obj.height - text.height) / 2;
+      text.x = (obj.width - text.width) / 2; // Center text horizontally in the box
+      text.y = (obj.height - text.height) / 2; // Center text vertically in the box
 
       // Ensure hover background is behind the box and text
       container.addChild(hoverBg);
@@ -152,8 +153,6 @@ const TimePanel: React.FC = () => {
         }, 200);
       });
 
-      // Active object styling already applied via strokeWidth above
-
       if (appRef.current) {appRef.current.stage.addChild(container)} //console.log('Added container to stage, stage children count:', appRef.current.stage.children.length);
       objectsRef.current.set(obj.id, container);
     });
@@ -172,9 +171,13 @@ const TimePanel: React.FC = () => {
         const draggedObject = objects.find(o => o.id === dragObjectId);
         if (draggedObject) {
           const deltaY = event.clientY - dragStartY;
-          const newStackOrder = Math.max(0, Math.min(objects.length - 1,
-          Math.round(deltaY / 35) + draggedObject.stackOrder));
-          if (newStackOrder !== draggedObject.stackOrder) {dispatch(dragDrop({ id: dragObjectId, newStackOrder }))}
+          const newStackOrder = 
+            Math.max(0, Math.min(objects.length - 1,
+            Math.round(deltaY / panelLineHeight) + draggedObject.stackOrder));
+          if (newStackOrder !== draggedObject.stackOrder) {
+            // console.log(`Moved ${draggedObject.id} to position ${newStackOrder}`);
+            dispatch(dragDrop({ id: dragObjectId, newStackOrder }))
+          }
         }
       }
 
