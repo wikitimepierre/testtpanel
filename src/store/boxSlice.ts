@@ -96,7 +96,7 @@ export const boxSlice = createSlice({
         // Update Y positions based on new stack order
         const sortedObjects = [...state.objects].sort((a, b) => a.stackOrder - b.stackOrder);
         sortedObjects.forEach((obj, index) => {
-          obj.y = index * 35 + 50;
+          obj.y = index * panelLineHeight;
         });
         saveToHistory(state);
       }
@@ -120,7 +120,7 @@ export const boxSlice = createSlice({
       // Re-order remaining objects
       const sortedObjects = state.objects
         .sort((a, b) => a.stackOrder - b.stackOrder)
-        .map((obj, index) => ({ ...obj, stackOrder: index, y: index * 35 + 50 }));
+        .map((obj, index) => ({ ...obj, stackOrder: index, y: index * panelLineHeight }));
       state.objects = sortedObjects;
       saveToHistory(state);
     },
@@ -131,7 +131,7 @@ export const boxSlice = createSlice({
         id: nextId,
         type: 'container',
         x: Math.random() * 400 + 50,
-        y: state.objects.length * 35 + 50,
+        y: state.objects.length * panelLineHeight,
         width: 120,
         height: 30,
         text: action.payload.properties.name || 'Container',
