@@ -4,11 +4,11 @@ import { useAppDispatch, useAppSelector } from '../hooks/redux';
 import { setActiveObject, dragDrop } from '../store/boxSlice';
 // import { colorToggle } from '../store/boxSlice';
 
-const PixiCanvas: React.FC = () => {
+const TimePanel: React.FC = () => {
   // Use a callback ref to guarantee the DOM node is available
   const [containerNode, setContainerNode] = useState<HTMLDivElement | null>(null);
   const canvasRef = useCallback((node: HTMLDivElement | null) => {
-    console.log('PixiCanvas callback ref called. Node:', node);
+    console.log('TimePanel callback ref called. Node:', node);
     setContainerNode(node);
   }, []);
   const appRef = useRef<PIXI.Application | null>(null);
@@ -27,13 +27,13 @@ const PixiCanvas: React.FC = () => {
   const fullWidth = appRef.current ? appRef.current.renderer.width : canvasWidth; // entire line: from left edge of canvas across full width
 
   // Debug logging
-  console.log('PixiCanvas render - objects:', objects);
-  console.log('PixiCanvas render - appRef.current:', appRef.current);
+  console.log('TimePanel render - objects:', objects);
+  console.log('TimePanel render - appRef.current:', appRef.current);
   useEffect(() => {
     let destroyed = false;
     if (!containerNode) return;
     if (!appRef.current) {
-      console.log('PixiCanvas: Initializing PIXI app...');
+      console.log('TimePanel: Initializing PIXI app...');
       const app = new PIXI.Application();
       app.init({
         width: canvasWidth,
@@ -41,7 +41,7 @@ const PixiCanvas: React.FC = () => {
         backgroundColor: 0x00FF00,
         backgroundAlpha: 1
       }).then(() => {
-        console.log('PixiCanvas: PIXI app initialized! destroyed:', destroyed, 'containerNode:', containerNode);
+        console.log('TimePanel: PIXI app initialized! destroyed:', destroyed, 'containerNode:', containerNode);
         if (destroyed) {
           app.destroy();
           return;
@@ -70,7 +70,7 @@ const PixiCanvas: React.FC = () => {
 
   useEffect(() => {
     if (!appRef.current) {return}// console.log('No PIXI app available');
-    // console.log('PixiCanvas objects array:', objects);
+    // console.log('TimePanel objects array:', objects);
     if (objects.length === 0) {return}// console.log('No objects to render');
     // console.log('Rendering', objects.length, 'objects');
 
@@ -199,4 +199,4 @@ const PixiCanvas: React.FC = () => {
   return <div ref={canvasRef} className="pixi-canvas-top" />;
 };
 
-export default PixiCanvas;
+export default TimePanel;

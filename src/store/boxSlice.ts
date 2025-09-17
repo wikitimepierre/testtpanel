@@ -55,13 +55,13 @@ export const boxSlice = createSlice({
       state.activeObjectId = action.payload;
     },
 
-    colorToggle: (state, action: PayloadAction<number>) => {
-      const object = state.objects.find(obj => obj.id === action.payload);
-      if (object) {
-        object.color = object.color === 'grey' ? 'yellow' : 'grey';
-        saveToHistory(state);
-      }
-    },
+    // colorToggle: (state, action: PayloadAction<number>) => {
+    //   const object = state.objects.find(obj => obj.id === action.payload);
+    //   if (object) {
+    //     object.color = object.color === 'grey' ? 'yellow' : 'grey';
+    //     saveToHistory(state);
+    //   }
+    // },
 
     // Create a new simple box with id = max id + 1 and appended to the end
     generateBox: (state) => {
