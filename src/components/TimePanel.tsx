@@ -5,12 +5,8 @@ import { setActiveObject, dragDrop } from '../store/boxSlice';
 // import { colorToggle } from '../store/boxSlice';
 
 const TimePanel: React.FC = () => {
-  // Use a callback ref to guarantee the DOM node is available
-  const [containerNode, setContainerNode] = useState<HTMLDivElement | null>(null);
-  const canvasRef = useCallback((node: HTMLDivElement | null) => {
-    console.log('TimePanel callback ref called. Node:', node);
-    setContainerNode(node);
-  }, []);
+  // Use a ref for the container node to avoid unnecessary state updates
+  const containerNodeRef = useRef<HTMLDivElement | null>(null);
   const appRef = useRef<PIXI.Application | null>(null);
   const objectsRef = useRef<Map<number, PIXI.Container>>(new Map());
   const [appReady, setAppReady] = useState(false);
@@ -33,7 +29,7 @@ const TimePanel: React.FC = () => {
   console.log('TimePanel render - appRef.current:', appRef.current);
   useEffect(() => {
     let destroyed = false;
-    if (!containerNode) return;
+    if (!containerNodeRef.current) return;
     if (!appRef.current) {//console.log('TimePanel: Initializing PIXI app...');
       const app = new PIXI.Application();
       app.init({
@@ -46,14 +42,14 @@ const TimePanel: React.FC = () => {
           app.destroy();
           return;
         }
-        if (containerNode) {
-          containerNode.appendChild(app.canvas);
+        if (containerNodeRef.current) {
+          containerNodeRef.current.appendChild(app.canvas);
           appRef.current = app;
           setAppReady(true);
         } else {
           app.destroy();
         }
-      }).catch((error) => {app.destroy()});//console.error('Failed to initialize PIXI application:', error);
+      }).catch(() => {app.destroy()});//console.error('Failed to initialize PIXI application:', error);
     }
     return () => {
       destroyed = true;
@@ -63,7 +59,7 @@ const TimePanel: React.FC = () => {
         setAppReady(false);
       }
     };
-  }, [containerNode]);
+  }, []);
 
   useEffect(() => {
     if (!appRef.current) {return}// console.log('No PIXI app available');
@@ -194,7 +190,7 @@ const TimePanel: React.FC = () => {
     };
   }, [objects, activeObjectId, isPanelLineDragging, dragStartY, dragObjectId, dispatch, appReady]);
 
-  return <div ref={canvasRef} className="pixi-canvas-top" />;
+  return <div ref={containerNodeRef} className="pixi-canvas-top" />;
 };
 
 export default TimePanel;
