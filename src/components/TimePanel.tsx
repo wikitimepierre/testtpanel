@@ -1,4 +1,4 @@
-import React, { useRef, useEffect, useState, useCallback } from 'react';
+import React, { useRef, useEffect, useState } from 'react';
 import * as PIXI from 'pixi.js';
 import { useAppDispatch, useAppSelector } from '../hooks/redux';
 import { setActiveObject, dragDrop } from '../store/boxSlice';
@@ -84,9 +84,9 @@ const TimePanel: React.FC = () => {
       hoverBg.visible = false;
 
       // Create box graphics
-      const box = new PIXI.Graphics();
       const baseFill = obj.color === 'grey' ? 0xDDDDDD : 0xFFFF00;
       const strokeWidth = obj.id === activeObjectId ? timeBoxActiveBorder : timeBoxBorder;
+      const box = new PIXI.Graphics();
       box.clear();
       box.rect(0, 0, obj.width, obj.height);
       box.fill(baseFill);
@@ -95,10 +95,10 @@ const TimePanel: React.FC = () => {
       // Create text
       const text = new PIXI.Text({
         text: obj.text,
-        style: {fontFamily: 'Arial',fontSize: 12,fill: 0x000000,align: 'center'}
+        style: { fontFamily: 'Arial', fontSize: 12, fill: 0x000000, align: 'center' }
       });
-      text.x = (obj.width - text.width) / 2; // Center text horizontally in the box
-      text.y = (obj.height - text.height) / 2; // Center text vertically in the box
+      text.x = (obj.width - text.width) / 2;
+      text.y = (obj.height - text.height) / 2;
 
       // Ensure hover background is behind the box and text
       container.addChild(hoverBg);
