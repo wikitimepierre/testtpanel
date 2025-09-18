@@ -51,7 +51,7 @@ const TimePanel: React.FC = () => {
       }
     }
     return () => {
-      // Optionally, cleanup listeners or other resources here
+      // Option: cleanup listeners or other resources here
     };
   }, []);
 
@@ -83,7 +83,7 @@ const TimePanel: React.FC = () => {
       hoverBg.fill(0x0000FF); hoverBg.alpha = 0.2;
       hoverBg.visible = false;
 
-      // Create box graphics (Pixi v8 API)
+      // Create box graphics
       const box = new PIXI.Graphics();
       const baseFill = obj.color === 'grey' ? 0xDDDDDD : 0xFFFF00;
       const strokeWidth = obj.id === activeObjectId ? timeBoxActiveBorder : timeBoxBorder;
