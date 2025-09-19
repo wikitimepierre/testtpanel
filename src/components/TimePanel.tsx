@@ -20,6 +20,7 @@ const TimePanel: React.FC = () => {
   // Use a ref for the container node to avoid unnecessary state updates
   const containerNodeRef = useRef<HTMLDivElement | null>(null);
   const appRef = useRef<PIXI.Application | null>(null);
+  // Map by object id, not line index
   const objectsRef = useRef<Map<number, PIXI.Container>>(new Map());
   const [appReady, setAppReady] = useState(false);
   const dispatch = useAppDispatch();
@@ -82,8 +83,6 @@ const TimePanel: React.FC = () => {
     const totalLines = Math.max(objects.length, Math.ceil(canvasTimePanelHeight / panelLineHeight));
     for (let i = 0; i < totalLines; i++) {
       const boxObj = objects.find(obj => obj.stackOrder === i) || null;
-      // Use your createTimeBox util here
-      // You may need to import it: import { createTimeBox } from './TimeBox';
       const container = createTimeBox({
         obj: boxObj,
         activeObjectId,
@@ -98,7 +97,10 @@ const TimePanel: React.FC = () => {
       if (appRef.current) {
         appRef.current.stage.addChild(container);
       }
-      objectsRef.current.set(i, container);
+      // Only set if boxObj exists (has an id)
+      if (boxObj) {
+        objectsRef.current.set(boxObj.id, container);
+      }
     }
 
     // Global pointer events for drag handling
@@ -106,7 +108,10 @@ const TimePanel: React.FC = () => {
       if (isPanelLineDragging && dragObjectId !== null) {
         const deltaY = event.clientY - dragStartY;
         const container = objectsRef.current.get(dragObjectId); // Visual feedback during drag
-        if (container) {container.y = objects.find(o => o.id === dragObjectId)!.y + deltaY}
+        const draggedObj = objects.find(o => o.id === dragObjectId);
+        if (container && draggedObj) {
+          container.y = draggedObj.y + deltaY;
+        }
       }
     };
 
