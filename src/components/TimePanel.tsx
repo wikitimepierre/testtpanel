@@ -1,7 +1,19 @@
+//TODOsoon allow selecting several boxes
+//TODOsoon use the types for timeBox/timeContainer
+//TODOsoon implement multi-select functionality
+//TODOsoon add visual feedback for selected boxes
+//TODOsoon allow dragging of multiple selected boxes
+//TODOsoon implement keyboard shortcuts for selection
+//TODOsoon optimize rendering of selected boxes
+//TODOsoon add support for touch devices
+
+
+
 import React, { useRef, useEffect, useState } from 'react';
 import * as PIXI from 'pixi.js';
 import { useAppDispatch, useAppSelector } from '../hooks/redux';
 import { setActiveObject, dragDrop } from '../store/boxSlice';
+import { createTimeBox } from './TimeBox';
 // import { colorToggle } from '../store/boxSlice';
 
 const TimePanel: React.FC = () => {
@@ -20,9 +32,6 @@ const TimePanel: React.FC = () => {
   const canvasTimePanelWidth = 550;
   const canvasTimePanelHeight = 500;
   const panelLineHeight = 35;
-  const fullWidth = appRef.current ? appRef.current.renderer.width : canvasTimePanelWidth; // entire line: from left edge of canvas across full width
-  const timeBoxBorder = 2;
-  const timeBoxActiveBorder = 5;
 
   // Debug logging
   console.log('TimePanel render - objects:', objects);
@@ -69,83 +78,28 @@ const TimePanel: React.FC = () => {
     });
     objectsRef.current.clear();
 
-    // Create objects
-    objects.forEach(obj => {
-      // console.log('Creating object:', obj);
-      const container = new PIXI.Container();
-      container.x = obj.x;
-      container.y = obj.y;
-
-      // Hover background (behind the box)
-      const hoverBg = new PIXI.Graphics();
-      hoverBg.clear();
-      hoverBg.rect(-container.x,-4, fullWidth, panelLineHeight + 4); // Start at -container.x so it aligns to canvas left in world space
-      hoverBg.fill(0x0000FF); hoverBg.alpha = 0.2;
-      hoverBg.visible = false;
-
-      // Create box graphics
-      const baseFill = obj.color === 'grey' ? 0xDDDDDD : 0xFFFF00;
-      const strokeWidth = obj.id === activeObjectId ? timeBoxActiveBorder : timeBoxBorder;
-      const box = new PIXI.Graphics();
-      box.clear();
-      box.rect(0, 0, obj.width, obj.height);
-      box.fill(baseFill);
-      box.stroke({ width: strokeWidth, color: 0x000000 });
-
-      // Create text
-      const text = new PIXI.Text({
-        text: obj.text,
-        style: { fontFamily: 'Arial', fontSize: 12, fill: 0x000000, align: 'center' }
+    // Render a full-width interactive line for every possible line index
+    const totalLines = Math.max(objects.length, Math.ceil(canvasTimePanelHeight / panelLineHeight));
+    for (let i = 0; i < totalLines; i++) {
+      const boxObj = objects.find(obj => obj.stackOrder === i) || null;
+      // Use your createTimeBox util here
+      // You may need to import it: import { createTimeBox } from './TimeBox';
+      const container = createTimeBox({
+        obj: boxObj,
+        activeObjectId,
+        onPointerDown: (event: any, obj: any) => {
+          dispatch(setActiveObject(obj.id));
+          setIsPanelLineDragging(true);
+          setDragStartY(event.clientY);
+          setDragObjectId(obj.id);
+        },
+        isPanelLineDragging,
       });
-      text.x = (obj.width - text.width) / 2;
-      text.y = (obj.height - text.height) / 2;
-
-      // Ensure hover background is behind the box and text
-      container.addChild(hoverBg);
-      container.addChild(box);
-      container.addChild(text);
-      // console.log('Created container at', container.x, container.y, 'with dimensions', obj.width, 'x', obj.height);
-
-      // Make interactive
-      container.eventMode = 'static';
-      container.cursor = 'pointer';
-
-      // Hover effects: show a blue background behind the box + change box border to blue
-      container.on('pointerenter', () => {
-        if (!isPanelLineDragging) {
-          hoverBg.visible = true;
-          box.stroke({ width: 2, color: 0x0000FF });
-        }
-      });
-      container.on('pointerleave', () => {
-        if (!isPanelLineDragging) {
-          hoverBg.visible = false;
-        }
-      });
-
-      // Click events
-      container.on('pointerdown', (event) => {
-        dispatch(setActiveObject(obj.id));
-        setIsPanelLineDragging(true);
-        setDragStartY(event.clientY);
-        setDragObjectId(obj.id);
-        // Hide hover highlight when starting a drag
-        hoverBg.visible = false;
-
-        // Start drag timer
-        setTimeout(() => {
-          if (isPanelLineDragging && dragObjectId === obj.id) {
-            // This is a drag operation
-          } else {
-            // This is a click - toggle color
-            // dispatch(colorToggle(obj.id));
-          }
-        }, 200);
-      });
-
-      if (appRef.current) {appRef.current.stage.addChild(container)} //console.log('Added container to stage, stage children count:', appRef.current.stage.children.length);
-      objectsRef.current.set(obj.id, container);
-    });
+      if (appRef.current) {
+        appRef.current.stage.addChild(container);
+      }
+      objectsRef.current.set(i, container);
+    }
 
     // Global pointer events for drag handling
     const handlePointerMove = (event: PointerEvent) => {
@@ -184,6 +138,7 @@ const TimePanel: React.FC = () => {
     };
   }, [objects, activeObjectId, isPanelLineDragging, dragStartY, dragObjectId, dispatch, appReady]);
 
+  if (!objects || objects.length === 0) return null;
   return <div ref={containerNodeRef} className="pixi-canvas-top" />;
 };
 
