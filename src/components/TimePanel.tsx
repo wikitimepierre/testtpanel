@@ -28,7 +28,7 @@ const TimePanel: React.FC = () => {
     width: canvasTimePanelWidth,
     height: canvasTimePanelHeight,
     backgroundColor: 0xFFA500,
-    backgroundAlpha: 0.5,
+    backgroundAlpha: 1,
     containerNodeRef,
     onInit: (app) => {
       renderBoxes(app);
@@ -39,7 +39,7 @@ const TimePanel: React.FC = () => {
   });
   // Map by object id, not line index
   const objectsRef = useRef<Map<number, PIXI.Container>>(new Map());
-  const [appReady, setAppReady] = useState(false);
+  // ...existing code...
   const dispatch = useAppDispatch();
   const { objects, activeObjectId } = useAppSelector(state => state.boxes);
 
@@ -51,33 +51,7 @@ const TimePanel: React.FC = () => {
   // Debug logging
   console.log('TimePanel render - objects:', objects);
   console.log('TimePanel render - appRef.current:', appRef.current);
-  useEffect(() => {
-    if (!containerNodeRef.current) return;
-    // Only create PIXI app and canvas if not already present
-    if (!appRef.current) {
-      const app = new PIXI.Application();
-      app.init({
-        width: canvasTimePanelWidth,
-        height: canvasTimePanelHeight,
-        backgroundColor: 0xFFA500,
-        backgroundAlpha: .5
-      }).then(() => {
-        if (containerNodeRef.current && !containerNodeRef.current.contains(app.canvas)) {
-          containerNodeRef.current.appendChild(app.canvas);
-        }
-        appRef.current = app;
-        setAppReady(true);
-      }).catch(() => {app.destroy();});
-    } else {
-      // If canvas already exists, ensure it's still in the container
-      if (containerNodeRef.current && appRef.current.canvas && !containerNodeRef.current.contains(appRef.current.canvas)) {
-        containerNodeRef.current.appendChild(appRef.current.canvas);
-      }
-    }
-    return () => {
-      // Option: cleanup listeners or other resources here
-    };
-  }, []);
+  // ...existing code...
 
   // Helper to render boxes in PIXI
   function renderBoxes(app: PIXI.Application) {
