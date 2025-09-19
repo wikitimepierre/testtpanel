@@ -11,6 +11,7 @@
 
 import React, { useRef, useEffect, useState } from 'react';
 import * as PIXI from 'pixi.js';
+import { useTimePanelCanvas } from '../hooks/useTimePanelCanvas';
 import { useAppDispatch, useAppSelector } from '../hooks/redux';
 import { setActiveObject, dragDrop } from '../store/boxSlice';
 import { createTimeBox } from './TimeBox';
@@ -19,7 +20,23 @@ import { createTimeBox } from './TimeBox';
 const TimePanel: React.FC = () => {
   // Use a ref for the container node to avoid unnecessary state updates
   const containerNodeRef = useRef<HTMLDivElement | null>(null);
-  const appRef = useRef<PIXI.Application | null>(null);
+  const canvasTimePanelWidth = 550;
+  const canvasTimePanelHeight = 500;
+  const panelLineHeight = 35;
+  // Use custom hook for PIXI app/canvas lifecycle
+  const appRef = useTimePanelCanvas({
+    width: canvasTimePanelWidth,
+    height: canvasTimePanelHeight,
+    backgroundColor: 0xFFA500,
+    backgroundAlpha: 0.5,
+    containerNodeRef,
+    onInit: (app) => {
+      renderBoxes(app);
+    },
+    onCleanup: () => {
+      objectsRef.current.clear();
+    }
+  });
   // Map by object id, not line index
   const objectsRef = useRef<Map<number, PIXI.Container>>(new Map());
   const [appReady, setAppReady] = useState(false);
@@ -30,9 +47,6 @@ const TimePanel: React.FC = () => {
   const [dragStartY, setDragStartY] = useState(0);
   const [dragObjectId, setDragObjectId] = useState<number | null>(null);
 
-  const canvasTimePanelWidth = 550;
-  const canvasTimePanelHeight = 500;
-  const panelLineHeight = 35;
 
   // Debug logging
   console.log('TimePanel render - objects:', objects);
@@ -65,21 +79,15 @@ const TimePanel: React.FC = () => {
     };
   }, []);
 
-  useEffect(() => {
-    if (!appRef.current) {return}// console.log('No PIXI app available');
-    // console.log('TimePanel objects array:', objects);
-    if (objects.length === 0) {return}// console.log('No objects to render');
-    // console.log('Rendering', objects.length, 'objects');
-
-    // Clear existing objects
+  // Helper to render boxes in PIXI
+  function renderBoxes(app: PIXI.Application) {
     objectsRef.current.forEach(container => {
-      if (appRef.current && appRef.current.stage.children.includes(container)) {
-        appRef.current.stage.removeChild(container);
+      if (app.stage.children.includes(container)) {
+        app.stage.removeChild(container);
       }
     });
     objectsRef.current.clear();
 
-    // Render a full-width interactive line for every possible line index
     const totalLines = Math.max(objects.length, Math.ceil(canvasTimePanelHeight / panelLineHeight));
     for (let i = 0; i < totalLines; i++) {
       const boxObj = objects.find(obj => obj.stackOrder === i) || null;
@@ -94,20 +102,26 @@ const TimePanel: React.FC = () => {
         },
         isPanelLineDragging,
       });
-      if (appRef.current) {
-        appRef.current.stage.addChild(container);
-      }
-      // Only set if boxObj exists (has an id)
+      app.stage.addChild(container);
       if (boxObj) {
         objectsRef.current.set(boxObj.id, container);
       }
     }
+  }
 
-    // Global pointer events for drag handling
+  // Re-render boxes when objects or activeObjectId change
+  useEffect(() => {
+    if (appRef.current) {
+      renderBoxes(appRef.current);
+    }
+  }, [objects, activeObjectId, isPanelLineDragging]);
+
+  // Global pointer events for drag handling
+  useEffect(() => {
     const handlePointerMove = (event: PointerEvent) => {
       if (isPanelLineDragging && dragObjectId !== null) {
         const deltaY = event.clientY - dragStartY;
-        const container = objectsRef.current.get(dragObjectId); // Visual feedback during drag
+        const container = objectsRef.current.get(dragObjectId);
         const draggedObj = objects.find(o => o.id === dragObjectId);
         if (container && draggedObj) {
           container.y = draggedObj.y + deltaY;
@@ -124,7 +138,6 @@ const TimePanel: React.FC = () => {
             Math.max(0, Math.min(objects.length - 1,
             Math.round(deltaY / panelLineHeight) + draggedObject.stackOrder));
           if (newStackOrder !== draggedObject.stackOrder) {
-            // console.log(`Moved ${draggedObject.id} to position ${newStackOrder}`);
             dispatch(dragDrop({ id: dragObjectId, newStackOrder }))
           }
         }
@@ -141,9 +154,9 @@ const TimePanel: React.FC = () => {
       window.removeEventListener('pointermove', handlePointerMove);
       window.removeEventListener('pointerup', handlePointerUp);
     };
-  }, [objects, activeObjectId, isPanelLineDragging, dragStartY, dragObjectId, dispatch, appReady]);
+  }, [isPanelLineDragging, dragStartY, dragObjectId, objects, dispatch]);
 
-  if (!objects || objects.length === 0) return null;
+  // Always render the container div for PIXI canvas
   return <div ref={containerNodeRef} className="pixi-canvas-top" />;
 };
 
