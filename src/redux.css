@@ -1,6 +1,5 @@
 .pixi-canvas-top {
   border: 5px solid rgb(16, 0, 238);
-  background: rgba(255,0,0,0.1);
   position: fixed;
   top: 0;
   left: 0;
