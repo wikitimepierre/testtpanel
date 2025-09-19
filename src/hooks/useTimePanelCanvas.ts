@@ -4,7 +4,7 @@ import { useEffect, useRef } from 'react';
 import * as PIXI from 'pixi.js';
 
 /**
- * usePixiCanvas hook
+ * useTimePanelCanvas hook
  * @param width - Canvas width
  * @param height - Canvas height
  * @param backgroundColor - Canvas background color
@@ -14,7 +14,7 @@ import * as PIXI from 'pixi.js';
  * @param containerNodeRef - Ref to the container div for mounting canvas
  * @returns appRef - Ref to the PIXI.Application instance
  */
-export function usePixiCanvas({
+export function useTimePanelCanvas({
   width,
   height,
   backgroundColor,
