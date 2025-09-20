@@ -38,6 +38,18 @@ export function createTimeBox({ obj, activeObjectId, onPointerDown, isPanelLineD
 
   container.addChild(hoverBg);
 
+  // Selection background (darker than hover, shows when selected)
+  const selectionBg = new Graphics();
+  selectionBg.clear();
+  selectionBg.rect(0, -2, panelLineWidth, panelLineHeight);
+  selectionBg.fill(0x2C5AA0); // Darker blue for selection
+  selectionBg.alpha = 0.25; // More prominent than hover
+  selectionBg.visible = obj?.id === activeObjectId; // Show if selected
+  // Mark this as the selection background
+  (selectionBg as any).isSelectionBackground = true;
+
+  container.addChild(selectionBg);
+
   // Only draw box and text if obj is present
   let box: Graphics | null = null;
   let text: Text | null = null;
@@ -67,10 +79,14 @@ export function createTimeBox({ obj, activeObjectId, onPointerDown, isPanelLineD
   // Hover logic for the entire line
   container.on('pointerenter', () => {
     if (!isPanelLineDragging) {
-      hoverBg.visible = true;
+      // Only show hover background if not selected
+      if (obj?.id !== activeObjectId) {
+        hoverBg.visible = true;
+      }
       if (box) {
         // Enhance box border on hover
-        box.stroke({ width: 3, color: 0x4A90E2 });
+        const hoverBorderWidth = obj?.id === activeObjectId ? 5 : 3; // Thicker if selected
+        box.stroke({ width: hoverBorderWidth, color: 0x4A90E2 });
       }
     }
   });
@@ -80,8 +96,8 @@ export function createTimeBox({ obj, activeObjectId, onPointerDown, isPanelLineD
       hoverBg.visible = false;
       if (box) {
         // Restore original border
-        const originalColor = obj?.id === activeObjectId ? 0x000000 : 0x000000;
-        box.stroke({ width: strokeWidth, color: originalColor });
+        const strokeWidth = obj?.id === activeObjectId ? 4 : 2; // Thicker border for selected
+        box.stroke({ width: strokeWidth, color: 0x000000 });
       }
     }
   });

@@ -1,6 +1,6 @@
 // Custom React hook to manage PIXI.js canvas lifecycle in a component
 // Handles initialization, mounting, cleanup, and optional callbacks
-import { useEffect, useRef, useCallback } from 'react';
+import { useEffect, useRef } from 'react';
 import { Application } from 'pixi.js';
 
 /**

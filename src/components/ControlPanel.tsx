@@ -21,6 +21,7 @@ const ControlPanel: React.FC = () => {
       <button onClick={handleDelete} disabled={activeObjectId === null}>Delete</button>
       <button onClick={handleNew}>New</button>
       <div style={{ marginLeft: 12, display: 'inline-block' }}>
+        <span style={{ marginRight: 8 }}>Active: {activeObjectId !== null ? activeObjectId : 'none'}</span>
         <span style={{ marginRight: 8 }}>FPS: {typeof fps === 'number' ? fps.toFixed(0) : '-'}</span>
         <span>Containers: {typeof containers === 'number' ? containers : '-'}</span>
       </div>

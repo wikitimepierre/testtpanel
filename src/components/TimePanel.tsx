@@ -53,6 +53,13 @@ const TimePanel: React.FC = () => {
   useEffect(() => { objectsRefState.current = objects; }, [objects]);
   // Track previous selected id to update only two containers on selection change
   const prevSelectedIdRef = useRef<number | null>(null);
+  // Add ref to track current activeObjectId to avoid stale closures
+  const activeObjectIdRef = useRef<number | null>(activeObjectId);
+
+  // Keep the ref in sync with the Redux state
+  useEffect(() => {
+    activeObjectIdRef.current = activeObjectId;
+  }, [activeObjectId]);
 
   // Helper function to create a full-width hover area for a line
   const createLineHoverArea = useCallback((boxObj: BoxObject, boxContainer: Container) => {
@@ -60,26 +67,55 @@ const TimePanel: React.FC = () => {
     lineContainer.x = 0;
     lineContainer.y = 0;
 
-    // Create invisible full-width hover zone
-    const hoverZone = new Graphics();
-    hoverZone.rect(0, 0, PANEL_CONFIG.CANVAS_WIDTH, PANEL_CONFIG.LINE_HEIGHT);
-    hoverZone.fill(0x000000); // Color doesn't matter since it's invisible
-    hoverZone.alpha = 0; // Make it invisible but still interactive
-    lineContainer.addChild(hoverZone);
+    // Create two invisible zones: before and after the box
+    const leftZone = new Graphics();
+    const rightZone = new Graphics();
+    
+    if (boxObj) {
+      // Left zone: from 0 to box start
+      if (boxObj.x > 0) {
+        leftZone.rect(0, 0, boxObj.x, PANEL_CONFIG.LINE_HEIGHT);
+        leftZone.fill(0x000000);
+        leftZone.alpha = 0;
+        lineContainer.addChild(leftZone);
+      }
+      
+      // Right zone: from box end to canvas width
+      const rightStart = boxObj.x + boxObj.width;
+      if (rightStart < PANEL_CONFIG.CANVAS_WIDTH) {
+        rightZone.rect(rightStart, 0, PANEL_CONFIG.CANVAS_WIDTH - rightStart, PANEL_CONFIG.LINE_HEIGHT);
+        rightZone.fill(0x000000);
+        rightZone.alpha = 0;
+        lineContainer.addChild(rightZone);
+      }
+    } else {
+      // If no box, cover the full width
+      leftZone.rect(0, 0, PANEL_CONFIG.CANVAS_WIDTH, PANEL_CONFIG.LINE_HEIGHT);
+      leftZone.fill(0x000000);
+      leftZone.alpha = 0;
+      lineContainer.addChild(leftZone);
+    }
 
     // Make the line container interactive
     lineContainer.eventMode = 'static';
     lineContainer.cursor = 'pointer';
 
-    // Get the TimeBox's hover background element to control it directly
+    // Get the TimeBox backgrounds for direct control
     const timeBoxHoverBg = boxContainer.children.find(child => 
       child instanceof Graphics && (child as any).isHoverBackground
     ) as Graphics | undefined;
 
-    // Forward hover events to show/hide the TimeBox hover background
+    const timeBoxSelectionBg = boxContainer.children.find(child => 
+      child instanceof Graphics && (child as any).isSelectionBackground
+    ) as Graphics | undefined;
+
+    // Forward hover events by directly controlling the backgrounds
     lineContainer.on('pointerenter', () => {
-      if (!isDraggingRef.current && timeBoxHoverBg) {
-        timeBoxHoverBg.visible = true;
+      if (!isDraggingRef.current && timeBoxHoverBg && timeBoxSelectionBg) {
+        // Only show hover if not selected (check selection background visibility)
+        if (!timeBoxSelectionBg.visible) {
+          timeBoxHoverBg.visible = true;
+        }
       }
     });
 
@@ -90,9 +126,14 @@ const TimePanel: React.FC = () => {
     });
 
     lineContainer.on('pointerdown', (event: PointerEvent) => {
-      // Forward click to trigger the same behavior as clicking the box
-      dispatch(setActiveObject(boxObj.id));
-      isDraggingRef.current = true;
+      const currentActiveId = activeObjectIdRef.current;
+      // Toggle selection: if already selected, unselect; otherwise select
+      if (currentActiveId === boxObj.id) {
+        dispatch(setActiveObject(null)); // Unselect if clicking the same object
+      } else {
+        dispatch(setActiveObject(boxObj.id)); // Select if clicking a different object
+      }
+      // Don't start dragging immediately - wait for pointer move
       dragStartYRef.current = event.clientY;
       dragObjectIdRef.current = boxObj.id;
     });
@@ -121,8 +162,14 @@ const TimePanel: React.FC = () => {
           obj: boxObj,
           activeObjectId,
           onPointerDown: (event: PointerEvent, obj: BoxObject) => {
-            dispatch(setActiveObject(obj.id));
-            isDraggingRef.current = true;
+            const currentActiveId = activeObjectIdRef.current;
+            // Toggle selection: if already selected, unselect; otherwise select
+            if (currentActiveId === obj.id) {
+              dispatch(setActiveObject(null)); // Unselect if clicking the same object
+            } else {
+              dispatch(setActiveObject(obj.id)); // Select if clicking a different object
+            }
+            // Don't start dragging immediately - wait for pointer move
             dragStartYRef.current = event.clientY;
             dragObjectIdRef.current = obj.id;
           },
@@ -130,22 +177,32 @@ const TimePanel: React.FC = () => {
         });
         app.stage.addChild(container);
         objectsRef.current.set(boxObj.id, container);
+
+        // Create full-width hover area for this line AFTER the box is created
+        const lineHoverArea = createLineHoverArea(boxObj, container);
+        app.stage.addChild(lineHoverArea);
+        lineHoverAreasRef.current.set(boxObj.id, lineHoverArea);
       }
       // Keep position synced (fallback to stackOrder line if no y)
       const newY = (boxObj as BoxObject).y ?? boxObj.stackOrder * PANEL_CONFIG.LINE_HEIGHT;
       if (container.y !== newY) container.y = newY;
+      
+      // Update selection background visibility based on current activeObjectId
+      const selectionBg = container.children.find(child => 
+        child instanceof Graphics && (child as any).isSelectionBackground
+      ) as Graphics | undefined;
+      if (selectionBg) {
+        selectionBg.visible = boxObj.id === activeObjectId;
+      }
+      
       // Selection visual (alpha only to avoid unsupported tint on Container)
       container.alpha = boxObj.id === activeObjectId ? 1 : 0.9;
 
-      // Create full-width hover area for this line
-      let lineHoverArea = lineHoverAreasRef.current.get(boxObj.id);
-      if (!lineHoverArea) {
-        lineHoverArea = createLineHoverArea(boxObj, container);
-        app.stage.addChild(lineHoverArea);
-        lineHoverAreasRef.current.set(boxObj.id, lineHoverArea);
+      // Update line hover area position if it exists
+      const existingLineHoverArea = lineHoverAreasRef.current.get(boxObj.id);
+      if (existingLineHoverArea) {
+        if (existingLineHoverArea.y !== newY) existingLineHoverArea.y = newY;
       }
-      // Keep line hover area position synced
-      if (lineHoverArea.y !== newY) lineHoverArea.y = newY;
     }
 
     // Clean up line hover areas for removed objects
@@ -180,19 +237,27 @@ const TimePanel: React.FC = () => {
     if (appRef.current) {
       renderBoxes(appRef.current);
     }
-  }, [objects]);
+  }, [objects, activeObjectId]);
 
   // Global pointer events for drag handling (mounted once)
   useEffect(() => {
     const handlePointerMove = (event: PointerEvent) => {
-      if (isDraggingRef.current && dragObjectIdRef.current !== null) {
-        const deltaY = event.clientY - dragStartYRef.current;
-        const id = dragObjectIdRef.current;
-        const container = objectsRef.current.get(id);
-        const draggedObj = objectsRefState.current.find(o => o.id === id);
-        if (container && draggedObj) {
-          const baseY = (draggedObj as BoxObject).y ?? draggedObj.stackOrder * PANEL_CONFIG.LINE_HEIGHT;
-          container.y = baseY + deltaY;
+      if (dragObjectIdRef.current !== null) {
+        const deltaY = Math.abs(event.clientY - dragStartYRef.current);
+        
+        // Start dragging only if moved more than 5 pixels (drag threshold)
+        if (!isDraggingRef.current && deltaY > 5) {
+          isDraggingRef.current = true;
+        }
+        
+        if (isDraggingRef.current) {
+          const id = dragObjectIdRef.current;
+          const container = objectsRef.current.get(id);
+          const draggedObj = objectsRefState.current.find(o => o.id === id);
+          if (container && draggedObj) {
+            const baseY = (draggedObj as BoxObject).y ?? draggedObj.stackOrder * PANEL_CONFIG.LINE_HEIGHT;
+            container.y = baseY + (event.clientY - dragStartYRef.current);
+          }
         }
       }
     };
@@ -215,6 +280,7 @@ const TimePanel: React.FC = () => {
           }
         }
       }
+      // Reset both dragging state and drag target
       isDraggingRef.current = false;
       dragObjectIdRef.current = null;
     };
