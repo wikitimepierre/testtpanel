@@ -5,8 +5,8 @@
 - [x] ~~hover a box shows a Panel line background... hover a line with a box (not lines with no boxes) should do the same~~ **IMPLEMENTED**: Enhanced hover with professional styling
 - [x] ~~Click box or line selects the box and line and shows a visual feedeback (box has wider border + line is darker). Clicking again unselects the box and line~~ **IMPLEMENTED**: Toggle selection with visual feedback
 - [ ] I select a line/box. then i drag that selection. when I drop it will move that selection to a destination. I want to visualize that potential destination as a black line before i actually drop it by releasing the mouse button.
-- [ ] Multi-select functionality for boxes/lines
-- [ ] Drag-and-drop for multiple selected boxes/lines
+- [ ] Multi-select boxes/lines when Shift is pressed
+- [ ] Drag-and-drop for multiple selected boxes/lines. 
 
 ## Medium Priority Features  
 - [ ] Visual feedback improvements for selected boxes/lines

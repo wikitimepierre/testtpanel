@@ -12,7 +12,7 @@
  */
 
 import React, { useRef, useEffect, memo, useCallback } from 'react';
-import { Application, Container, TickerCallback, Graphics } from 'pixi.js';
+import { Application, Container, Graphics, TickerCallback } from 'pixi.js';
 import { useTimePanelCanvas } from '../hooks/useTimePanelCanvas';
 import { useAppDispatch, useAppSelector } from '../hooks/redux';
 import { setActiveObject, dragDrop, setPerfMetrics } from '../store/boxSlice';
@@ -30,6 +30,14 @@ const TimePanel: React.FC = () => {
     backgroundAlpha: 1,
     containerNodeRef,
     onInit: (app) => {
+      // Create and add drag preview line (initially hidden)
+      const dragPreviewLine = new Graphics();
+      dragPreviewLine.rect(0, -1, PANEL_CONFIG.CANVAS_WIDTH, 1); // 1px thick black line
+      dragPreviewLine.fill(0x000000); // Black color
+      dragPreviewLine.visible = false; // Initially hidden
+      app.stage.addChild(dragPreviewLine);
+      dragPreviewLineRef.current = dragPreviewLine;
+      
       renderBoxes(app);
     },
     onCleanup: () => {
@@ -40,6 +48,8 @@ const TimePanel: React.FC = () => {
   const objectsRef = useRef<Map<number, Container>>(new Map());
   // Map for line hover areas - each line gets a full-width hover zone
   const lineHoverAreasRef = useRef<Map<number, Container>>(new Map());
+  // Drag destination preview line
+  const dragPreviewLineRef = useRef<Graphics | null>(null);
   // ...existing code...
   const dispatch = useAppDispatch();
   const { objects, activeObjectId } = useAppSelector(state => state.boxes);
@@ -60,6 +70,61 @@ const TimePanel: React.FC = () => {
   useEffect(() => {
     activeObjectIdRef.current = activeObjectId;
   }, [activeObjectId]);
+
+  // Helper function to calculate target stack order for drag operations
+  const calculateTargetStackOrder = useCallback((mouseY: number, draggedObject: BoxObject) => {
+    const deltaY = mouseY - dragStartYRef.current;
+    return Math.max(
+      0,
+      Math.min(
+        objectsRefState.current.length - 1,
+        Math.round(deltaY / PANEL_CONFIG.LINE_HEIGHT) + draggedObject.stackOrder
+      )
+    );
+  }, []);
+
+  // Helper function to update drag preview line position
+  const updateDragPreviewLine = useCallback((mouseY: number, draggedObject: BoxObject) => {
+    const previewLine = dragPreviewLineRef.current;
+    if (!previewLine) return;
+
+    const targetStackOrder = calculateTargetStackOrder(mouseY, draggedObject);
+    const originalStackOrder = draggedObject.stackOrder;
+    
+    // Calculate the Y position where the line should appear to match Redux reordering behavior
+    let targetY: number;
+    
+    if (targetStackOrder === 0) {
+      // Moving to position 0 (top), show line above the first box
+      targetY = -2;
+    } else if (originalStackOrder < targetStackOrder) {
+      // Moving DOWN: dragged object will end up at targetStackOrder, 
+      // but objects between original and target will shift up by 1
+      // So visual insertion should be AFTER the current object at targetStackOrder
+      targetY = (targetStackOrder + 1) * PANEL_CONFIG.LINE_HEIGHT - 2;
+    } else if (originalStackOrder > targetStackOrder) {
+      // Moving UP: dragged object will end up at targetStackOrder,
+      // objects between target and original will shift down by 1
+      // So visual insertion should be BEFORE the current object at targetStackOrder
+      targetY = targetStackOrder * PANEL_CONFIG.LINE_HEIGHT - 2;
+    } else {
+      // No movement, hide the line
+      previewLine.visible = false;
+      return;
+    }
+    
+    // Position the preview line at the target location
+    previewLine.y = targetY;
+    previewLine.visible = true;
+  }, [calculateTargetStackOrder]);
+
+  // Helper function to hide drag preview line
+  const hideDragPreviewLine = useCallback(() => {
+    const previewLine = dragPreviewLineRef.current;
+    if (previewLine) {
+      previewLine.visible = false;
+    }
+  }, []);
 
   // Helper function to create a full-width hover area for a line
   const createLineHoverArea = useCallback((boxObj: BoxObject, boxContainer: Container) => {
@@ -257,6 +322,9 @@ const TimePanel: React.FC = () => {
           if (container && draggedObj) {
             const baseY = (draggedObj as BoxObject).y ?? draggedObj.stackOrder * PANEL_CONFIG.LINE_HEIGHT;
             container.y = baseY + (event.clientY - dragStartYRef.current);
+            
+            // Update drag preview line to show potential destination
+            updateDragPreviewLine(event.clientY, draggedObj as BoxObject);
           }
         }
       }
@@ -267,20 +335,16 @@ const TimePanel: React.FC = () => {
         const id = dragObjectIdRef.current;
         const draggedObject = objectsRefState.current.find(o => o.id === id);
         if (draggedObject) {
-          const deltaY = event.clientY - dragStartYRef.current;
-          const newStackOrder = Math.max(
-            0,
-            Math.min(
-              objectsRefState.current.length - 1,
-              Math.round(deltaY / PANEL_CONFIG.LINE_HEIGHT) + draggedObject.stackOrder
-            )
-          );
+          const newStackOrder = calculateTargetStackOrder(event.clientY, draggedObject);
+          
           if (newStackOrder !== draggedObject.stackOrder) {
             dispatch(dragDrop({ id, newStackOrder }));
           }
         }
       }
-      // Reset both dragging state and drag target
+      
+      // Hide drag preview line and reset dragging state
+      hideDragPreviewLine();
       isDraggingRef.current = false;
       dragObjectIdRef.current = null;
     };
@@ -291,7 +355,7 @@ const TimePanel: React.FC = () => {
       window.removeEventListener('pointermove', handlePointerMove);
       window.removeEventListener('pointerup', handlePointerUp);
     };
-  }, [dispatch]);
+  }, [dispatch, updateDragPreviewLine, hideDragPreviewLine, calculateTargetStackOrder]);
 
   // FPS sampler using PIXI ticker
   useEffect(() => {
