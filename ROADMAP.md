@@ -4,13 +4,14 @@
 - [x] ~~screen flashes each time i select a box (or any action)~~ **FIXED**: Optimized PIXI canvas lifecycle and React re-renders
 - [x] ~~hover a box shows a Panel line background... hover a line with a box (not lines with no boxes) should do the same~~ **IMPLEMENTED**: Enhanced hover with professional styling
 - [x] ~~Click box or line selects the box and line and shows a visual feedeback (box has wider border + line is darker). Clicking again unselects the box and line~~ **IMPLEMENTED**: Toggle selection with visual feedback
-- [x] ~~I select a line/box. then i drag that selection. when I drop it will move that selection to a destination. I want to visualize that potential destination as a black line before i actually drop it by releasing the mouse button.~~ **IMPLEMENTED**: Drag destination preview with accurate positioning
+- [x] ~~I select a line/box. then i drag that selection. when I drop it will move that selection to a destination. I want to visualize that potential destination as a black line before i actually drop it by releasing the mouse button.~~ **IMPLEMENTED**: Drag destination preview with accurate positioning → **REMOVED**: Preview line functionality removed per user request
 - [x] ~~when i undo or redo, every box/line is unselected~~ **IMPLEMENTED**: Selection cleared on undo/redo operations
 - [x] ~~when i undo or redo, every box/line is free of hover visual feedback~~ **IMPLEMENTED**: Hover states cleared on undo/redo operations
 - [x] ~~bug: if i select a box and then dragdrop it, it is unselected. it should be unselected ONLY if i click it not dragdrop it.~~ **FIXED**: Selection now persists after drag operations
 - [x] ~~if i dragdrop a box, it becomes selected. if another box was selected. this selection is cancelled.~~ **IMPLEMENTED**: Dragged box becomes selected immediately when drag starts, cancelling previous selection
 - [x] ~~when i dragdrop a box and, doing so, I hover a box, it shouldn't draw a hover box over that line/box~~ **FIXED**: Hover effects disabled during drag operations
 - [x] ~~if i dragdrop a box and drop before its stackOrder changes, the box stays where I droped and it should come back at its initial place~~ **FIXED**: Box returns to original position when dropped without stack order change
+- [x] ~~stackorder should change when box is dragged after 60% if going down and above 40% if going up~~ **IMPLEMENTED**: Asymmetric drag thresholds for better UX
 
 
 - add a top margin of 25 px at the top

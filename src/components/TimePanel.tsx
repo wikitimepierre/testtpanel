@@ -23,14 +23,6 @@ const TimePanel: React.FC = () => {
     backgroundAlpha: 1,
     containerNodeRef,
     onInit: (app) => {
-      // Create and add drag preview line (initially hidden)
-      const dragPreviewLine = new Graphics();
-      dragPreviewLine.rect(0, -1, PANEL_CONFIG.CANVAS_WIDTH, 1); // 1px thick black line
-      dragPreviewLine.fill(0x000000); // Black color
-      dragPreviewLine.visible = false; // Initially hidden
-      app.stage.addChild(dragPreviewLine);
-      dragPreviewLineRef.current = dragPreviewLine;
-      
       renderBoxes(app);
     },
     onCleanup: () => {
@@ -41,8 +33,6 @@ const TimePanel: React.FC = () => {
   const objectsRef = useRef<Map<number, Container>>(new Map());
   // Map for line hover areas - each line gets a full-width hover zone
   const lineHoverAreasRef = useRef<Map<number, Container>>(new Map());
-  // Drag destination preview line
-  const dragPreviewLineRef = useRef<Graphics | null>(null);
   // ...existing code...
   const dispatch = useAppDispatch();
   const { objects, activeObjectId } = useAppSelector(state => state.boxes);
@@ -60,63 +50,27 @@ const TimePanel: React.FC = () => {
   const activeObjectIdRef = useRef<number | null>(activeObjectId);
 
   // Keep the ref in sync with the Redux state
-  useEffect(() => {
-    activeObjectIdRef.current = activeObjectId;
-  }, [activeObjectId]);
+  useEffect(() => {activeObjectIdRef.current = activeObjectId}, [activeObjectId]);
 
   // Helper function to calculate target stack order for drag operations
   const calculateTargetStackOrder = useCallback((mouseY: number, draggedObject: BoxObject) => {
     const deltaY = mouseY - dragStartYRef.current;
+    const originalStackOrder = draggedObject.stackOrder;
+
+    // Calculate how many full line heights we've moved
+    const linesMoved = deltaY / PANEL_CONFIG.LINE_HEIGHT;
+
+    // Determine target stack order with asymmetric thresholds
+    let targetStackOrder = originalStackOrder;
+
+    if (linesMoved > 0) {targetStackOrder = originalStackOrder + Math.floor(linesMoved)} // Moving down
+    else if (linesMoved < 0) {targetStackOrder = originalStackOrder + Math.ceil(linesMoved)} // Moving up
+
+    // Clamp to valid range
     return Math.max(
       0,
-      Math.min(
-        objectsRefState.current.length - 1,
-        Math.round(deltaY / PANEL_CONFIG.LINE_HEIGHT) + draggedObject.stackOrder
-      )
+      Math.min(objectsRefState.current.length - 1, targetStackOrder)
     );
-  }, []);
-
-  // Helper function to update drag preview line position
-  const updateDragPreviewLine = useCallback((mouseY: number, draggedObject: BoxObject) => {
-    const previewLine = dragPreviewLineRef.current;
-    if (!previewLine) return;
-
-    const targetStackOrder = calculateTargetStackOrder(mouseY, draggedObject);
-    const originalStackOrder = draggedObject.stackOrder;
-    
-    // Calculate the Y position where the line should appear to match Redux reordering behavior
-    let targetY: number;
-    
-    if (targetStackOrder === 0) {
-      // Moving to position 0 (top), show line above the first box
-      targetY = -2;
-    } else if (originalStackOrder < targetStackOrder) {
-      // Moving DOWN: dragged object will end up at targetStackOrder, 
-      // but objects between original and target will shift up by 1
-      // So visual insertion should be AFTER the current object at targetStackOrder
-      targetY = (targetStackOrder + 1) * PANEL_CONFIG.LINE_HEIGHT - 2;
-    } else if (originalStackOrder > targetStackOrder) {
-      // Moving UP: dragged object will end up at targetStackOrder,
-      // objects between target and original will shift down by 1
-      // So visual insertion should be BEFORE the current object at targetStackOrder
-      targetY = targetStackOrder * PANEL_CONFIG.LINE_HEIGHT - 2;
-    } else {
-      // No movement, hide the line
-      previewLine.visible = false;
-      return;
-    }
-    
-    // Position the preview line at the target location
-    previewLine.y = targetY;
-    previewLine.visible = true;
-  }, [calculateTargetStackOrder]);
-
-  // Helper function to hide drag preview line
-  const hideDragPreviewLine = useCallback(() => {
-    const previewLine = dragPreviewLineRef.current;
-    if (previewLine) {
-      previewLine.visible = false;
-    }
   }, []);
 
   // Helper function to clear all hover visual feedback
@@ -333,9 +287,6 @@ const TimePanel: React.FC = () => {
           if (container && draggedObj) {
             const baseY = (draggedObj as BoxObject).y ?? draggedObj.stackOrder * PANEL_CONFIG.LINE_HEIGHT;
             container.y = baseY + (event.clientY - dragStartYRef.current);
-            
-            // Update drag preview line to show potential destination
-            updateDragPreviewLine(event.clientY, draggedObj as BoxObject);
           }
         }
       }
@@ -374,8 +325,7 @@ const TimePanel: React.FC = () => {
         }
       }
       
-      // Hide drag preview line and reset dragging state
-      hideDragPreviewLine();
+      // Reset dragging state
       isDraggingRef.current = false;
       dragObjectIdRef.current = null;
     };
@@ -386,7 +336,7 @@ const TimePanel: React.FC = () => {
       window.removeEventListener('pointermove', handlePointerMove);
       window.removeEventListener('pointerup', handlePointerUp);
     };
-  }, [dispatch, updateDragPreviewLine, hideDragPreviewLine, calculateTargetStackOrder]);
+  }, [dispatch, calculateTargetStackOrder]);
 
   // FPS sampler using PIXI ticker
   useEffect(() => {
