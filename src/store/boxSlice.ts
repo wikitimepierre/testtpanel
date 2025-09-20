@@ -161,6 +161,7 @@ export const boxSlice = createSlice({
       if (state.historyIndex > 0) {
         state.historyIndex--;
         state.objects = JSON.parse(JSON.stringify(state.history[state.historyIndex]));
+        state.activeObjectId = null; // Clear selection on undo
       }
     },
     
@@ -168,6 +169,7 @@ export const boxSlice = createSlice({
       if (state.historyIndex < state.history.length - 1) {
         state.historyIndex++;
         state.objects = JSON.parse(JSON.stringify(state.history[state.historyIndex]));
+        state.activeObjectId = null; // Clear selection on redo
       }
     },
     

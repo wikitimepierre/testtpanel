@@ -126,6 +126,32 @@ const TimePanel: React.FC = () => {
     }
   }, []);
 
+  // Helper function to clear all hover visual feedback
+  const clearAllHoverStates = useCallback(() => {
+    // Clear hover backgrounds from all containers
+    for (const [id, container] of objectsRef.current.entries()) {
+      const hoverBg = container.children.find(child => 
+        child instanceof Graphics && (child as any).isHoverBackground
+      ) as Graphics | undefined;
+      if (hoverBg) {
+        hoverBg.visible = false;
+      }
+
+      // Reset box borders to their normal state
+      const box = container.children.find(child => 
+        child instanceof Graphics && 
+        !(child as any).isHoverBackground && 
+        !(child as any).isSelectionBackground
+      ) as Graphics | undefined;
+      if (box) {
+        // Find the corresponding object to determine if it's selected for proper border width
+        const obj = objectsRefState.current.find(o => o.id === id);
+        const strokeWidth = obj?.id === activeObjectIdRef.current ? 4 : 2;
+        box.stroke({ width: strokeWidth, color: 0x000000 });
+      }
+    }
+  }, []);
+
   // Helper function to create a full-width hover area for a line
   const createLineHoverArea = useCallback((boxObj: BoxObject, boxContainer: Container) => {
     const lineContainer = new Container();
@@ -208,6 +234,9 @@ const TimePanel: React.FC = () => {
 
   // Helper to render boxes in PIXI
   const renderBoxes = useCallback((app: Application) => {
+    // Clear all hover visual feedback when objects change (e.g., after undo/redo)
+    clearAllHoverStates();
+    
     // Remove containers for objects that no longer exist
     const currentIds = new Set(objects.map(o => o.id));
     for (const [id, container] of objectsRef.current.entries()) {
@@ -279,7 +308,7 @@ const TimePanel: React.FC = () => {
         lineHoverAreasRef.current.delete(id);
       }
     }
-  }, [objects, activeObjectId]);
+  }, [objects, activeObjectId, clearAllHoverStates]);
 
   // Only update visual state of selected box when selection changes (touch 2 containers max)
   useEffect(() => {

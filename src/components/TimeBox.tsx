@@ -31,7 +31,7 @@ export function createTimeBox({ obj, activeObjectId, onPointerDown, isPanelLineD
   hoverBg.clear();
   hoverBg.rect(0, -2, panelLineWidth, panelLineHeight);
   hoverBg.fill(0x4A90E2); // More professional blue color
-  hoverBg.alpha = 0.15; // Subtle transparency
+  hoverBg.alpha = 0.5; // Subtle transparency
   hoverBg.visible = false;
   // Mark this as the hover background for external control
   (hoverBg as any).isHoverBackground = true;
@@ -43,7 +43,7 @@ export function createTimeBox({ obj, activeObjectId, onPointerDown, isPanelLineD
   selectionBg.clear();
   selectionBg.rect(0, -2, panelLineWidth, panelLineHeight);
   selectionBg.fill(0x2C5AA0); // Darker blue for selection
-  selectionBg.alpha = 0.25; // More prominent than hover
+  selectionBg.alpha = 1; // More prominent than hover
   selectionBg.visible = obj?.id === activeObjectId; // Show if selected
   // Mark this as the selection background
   (selectionBg as any).isSelectionBackground = true;
@@ -53,7 +53,7 @@ export function createTimeBox({ obj, activeObjectId, onPointerDown, isPanelLineD
   // Only draw box and text if obj is present
   let box: Graphics | null = null;
   let text: Text | null = null;
-  let strokeWidth = 2;
+  let strokeWidth = 1;
   if (obj) {
     const baseFill = obj.color === 'grey' ? 0xDDDDDD : 0xFFFF00;
     strokeWidth = obj.id === activeObjectId ? 4 : 2; // Thicker border for selected
@@ -83,11 +83,11 @@ export function createTimeBox({ obj, activeObjectId, onPointerDown, isPanelLineD
       if (obj?.id !== activeObjectId) {
         hoverBg.visible = true;
       }
-      if (box) {
-        // Enhance box border on hover
-        const hoverBorderWidth = obj?.id === activeObjectId ? 5 : 3; // Thicker if selected
-        box.stroke({ width: hoverBorderWidth, color: 0x4A90E2 });
-      }
+      // if (box) {
+      //   // Enhance box border on hover
+      //   const hoverBorderWidth = obj?.id === activeObjectId ? 5 : 3; // Thicker if selected
+      //   box.stroke({ width: hoverBorderWidth, color: 0x4A90E2 });
+      // }
     }
   });
   
