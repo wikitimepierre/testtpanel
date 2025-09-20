@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { useAppDispatch, useAppSelector } from '../hooks/redux';
 import { undo, redo, deleteObject, generateBox } from '../store/boxSlice';
 
@@ -28,4 +28,4 @@ const ControlPanel: React.FC = () => {
   );
 };
 
-export default ControlPanel;
+export default memo(ControlPanel);

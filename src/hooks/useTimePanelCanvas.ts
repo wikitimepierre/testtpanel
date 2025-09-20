@@ -1,7 +1,7 @@
 // Custom React hook to manage PIXI.js canvas lifecycle in a component
 // Handles initialization, mounting, cleanup, and optional callbacks
-import { useEffect, useRef } from 'react';
-import * as PIXI from 'pixi.js';
+import { useEffect, useRef, useCallback } from 'react';
+import { Application } from 'pixi.js';
 
 /**
  * useTimePanelCanvas hook
@@ -12,7 +12,7 @@ import * as PIXI from 'pixi.js';
  * @param onInit - Optional callback after PIXI app is initialized
  * @param onCleanup - Optional callback after PIXI app is destroyed
  * @param containerNodeRef - Ref to the container div for mounting canvas
- * @returns appRef - Ref to the PIXI.Application instance
+ * @returns appRef - Ref to the Application instance
  */
 export function useTimePanelCanvas({
   width,
@@ -27,12 +27,25 @@ export function useTimePanelCanvas({
   height: number;
   backgroundColor: number;
   backgroundAlpha: number;
-  onInit?: (app: PIXI.Application) => void;
+  onInit?: (app: Application) => void;
   onCleanup?: () => void;
   containerNodeRef: React.RefObject<HTMLDivElement>;
 }) {
-  // Ref to hold the PIXI.Application instance
-  const appRef = useRef<PIXI.Application | null>(null);
+  // Ref to hold the Application instance
+  const appRef = useRef<Application | null>(null);
+  
+  // Use refs for callbacks to maintain stable references
+  const onInitRef = useRef(onInit);
+  const onCleanupRef = useRef(onCleanup);
+  
+  // Update refs when callbacks change
+  useEffect(() => {
+    onInitRef.current = onInit;
+  }, [onInit]);
+  
+  useEffect(() => {
+    onCleanupRef.current = onCleanup;
+  }, [onCleanup]);
 
   useEffect(() => {
     // Only proceed if the container div is available
@@ -48,7 +61,7 @@ export function useTimePanelCanvas({
     canvases.forEach(canvas => canvas.remove());
 
     // Create a new PIXI app and initialize it
-    const app = new PIXI.Application();
+    const app = new Application();
     app.init({
       width,
       height,
@@ -63,8 +76,17 @@ export function useTimePanelCanvas({
       // Store the app instance in the ref
       appRef.current = app;
       // Call the optional onInit callback
-      if (onInit) onInit(app);
-    }).catch(() => {app.destroy();});
+      if (onInitRef.current) {
+        try {
+          onInitRef.current(app);
+        } catch (error) {
+          console.error('Error in onInit callback:', error);
+        }
+      }
+    }).catch((error) => {
+      console.error('Failed to initialize PIXI Application:', error);
+      app.destroy();
+    });
 
     // Cleanup function to destroy PIXI app and remove canvas on unmount or dependency change
     return () => {
@@ -79,9 +101,9 @@ export function useTimePanelCanvas({
         canvases.forEach(canvas => canvas.remove());
       }
       // Call the optional onCleanup callback
-      if (onCleanup) onCleanup();
+      if (onCleanupRef.current) onCleanupRef.current();
     };
-  }, [width, height, backgroundColor, backgroundAlpha, containerNodeRef, onInit, onCleanup]);
+  }, [width, height, backgroundColor, backgroundAlpha, containerNodeRef]);
 
   // Return the PIXI app ref for external use
   return appRef;

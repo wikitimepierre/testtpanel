@@ -1,18 +1,23 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
-import { BoxObject, AppState } from '../types';
+import { BoxObject, AppState, ContainerProperties, PANEL_CONFIG } from '../types';
 
-const panelLineHeight = 35;
-
-// TODOnow: hover a line with a box highlights the entire line
-// TODOnow: click a line with a box selects the box in it
+/**
+ * Box Slice - Redux state management for timeline boxes
+ * 
+ * Handles:
+ * - Box creation, deletion, and modification
+ * - Drag-and-drop reordering with stack order management
+ * - Undo/redo history tracking
+ * - Performance metrics for development
+ */
 
 const buildBox = (id: number): BoxObject => ({
   id,
   type: 'box',
   x: Math.random() * 400,
-  y: id * panelLineHeight,
-  width: 80 + Math.random() * 100,
-  height: 30,
+  y: id * PANEL_CONFIG.LINE_HEIGHT,
+  width: PANEL_CONFIG.DEFAULT_BOX_WIDTH + Math.random() * 100,
+  height: PANEL_CONFIG.DEFAULT_BOX_HEIGHT,
   text: `box-${id}`,
   color: 'grey',
   stackOrder: id
@@ -104,7 +109,7 @@ export const boxSlice = createSlice({
         // Update Y positions based on new stack order
         const sortedObjects = [...state.objects].sort((a, b) => a.stackOrder - b.stackOrder);
         sortedObjects.forEach((obj, index) => {
-          obj.y = index * panelLineHeight;
+          obj.y = index * PANEL_CONFIG.LINE_HEIGHT;
         });
         saveToHistory(state);
       }
@@ -128,22 +133,22 @@ export const boxSlice = createSlice({
       // Re-order remaining objects
       const sortedObjects = state.objects
         .sort((a, b) => a.stackOrder - b.stackOrder)
-        .map((obj, index) => ({ ...obj, stackOrder: index, y: index * panelLineHeight }));
+        .map((obj, index) => ({ ...obj, stackOrder: index, y: index * PANEL_CONFIG.LINE_HEIGHT }));
       state.objects = sortedObjects;
       saveToHistory(state);
     },
 
-    createContainer: (state, action: PayloadAction<{ parentId: number | null; properties: any }>) => {
+    createContainer: (state, action: PayloadAction<{ parentId: number | null; properties: ContainerProperties }>) => {
       const nextId = state.objects.length ? Math.max(...state.objects.map(o => o.id)) + 1 : 0;
       const newContainer: BoxObject = {
         id: nextId,
         type: 'container',
         x: Math.random() * 400 + 50,
-        y: state.objects.length * panelLineHeight,
-        width: 120,
-        height: 30,
-        text: action.payload.properties.name || 'Container',
-        color: 'grey',
+        y: state.objects.length * PANEL_CONFIG.LINE_HEIGHT,
+        width: action.payload.properties.width || 120,
+        height: action.payload.properties.height || PANEL_CONFIG.DEFAULT_BOX_HEIGHT,
+        text: action.payload.properties.text || 'Container',
+        color: action.payload.properties.color || 'grey',
         children: [],
         ...(action.payload.parentId ? { parentId: action.payload.parentId } : {}),
         stackOrder: state.objects.length

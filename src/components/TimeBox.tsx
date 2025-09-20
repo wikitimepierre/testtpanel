@@ -1,24 +1,33 @@
-import * as PIXI from 'pixi.js';
+/**
+ * TimeBox Component Factory
+ * 
+ * Creates PIXI.js container elements representing individual timeline boxes.
+ * Handles visual rendering, hover effects, and pointer interactions.
+ */
+
+import { Container, Graphics, Text } from 'pixi.js';
+import { BoxObject, PointerEventHandler } from '../types';
 
 export interface TimeBoxProps {
-  obj: any;
+  obj: BoxObject | null;
   activeObjectId: number | null;
-  onPointerDown: (event: any, obj: any) => void;
+  onPointerDown: PointerEventHandler;
   isPanelLineDragging: boolean;
 }
 
-//TODOsoon not when hover box but when hover line with a box
-//TODOsoon click a line with a box selects the box in it
+/**
+ * Creates a PIXI container representing a timeline box with hover and interaction support
+ */
 
 export function createTimeBox({ obj, activeObjectId, onPointerDown, isPanelLineDragging }: TimeBoxProps) {
-  const container = new PIXI.Container();
+  const container = new Container();
   container.x = 0;
   container.y = obj ? obj.y : 0;
 
   // Panel line background (full width, behind the box)
   const panelLineWidth = 550;
   const panelLineHeight = obj ? obj.height + 4 : 34; // Default height if no box
-  const hoverBg = new PIXI.Graphics();
+  const hoverBg = new Graphics();
   hoverBg.clear();
   hoverBg.rect(0, -4, panelLineWidth, panelLineHeight);
   hoverBg.fill(0x0000FF); hoverBg.alpha = 0.2;
@@ -27,20 +36,20 @@ export function createTimeBox({ obj, activeObjectId, onPointerDown, isPanelLineD
   container.addChild(hoverBg);
 
   // Only draw box and text if obj is present
-  let box: PIXI.Graphics | null = null;
-  let text: PIXI.Text | null = null;
+  let box: Graphics | null = null;
+  let text: Text | null = null;
   let strokeWidth = 2;
   if (obj) {
     const baseFill = obj.color === 'grey' ? 0xDDDDDD : 0xFFFF00;
     strokeWidth = obj.id === activeObjectId ? 5 : 2;
-    box = new PIXI.Graphics();
+    box = new Graphics();
     box.clear();
     box.rect(obj.x, 0, obj.width, obj.height);
     box.fill(baseFill);
     box.stroke({ width: strokeWidth, color: 0x000000 });
     container.addChild(box);
 
-    text = new PIXI.Text({
+    text = new Text({
       text: obj.text,
       style: { fontFamily: 'Arial', fontSize: 12, fill: 0x000000, align: 'center' }
     });
@@ -65,7 +74,7 @@ export function createTimeBox({ obj, activeObjectId, onPointerDown, isPanelLineD
       if (box) box.stroke({ width: strokeWidth, color: 0x000000 });
     }
   });
-  container.on('pointerdown', (event) => {
+  container.on('pointerdown', (event: PointerEvent) => {
     if (obj) onPointerDown(event, obj);
   });
 

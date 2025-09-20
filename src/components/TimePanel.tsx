@@ -1,32 +1,31 @@
-//TODOsoon allow selecting several boxes
-//TODOsoon use the types for timeBox/timeContainer
-//TODOsoon implement multi-select functionality
-//TODOsoon add visual feedback for selected boxes
-//TODOsoon allow dragging of multiple selected boxes
-//TODOsoon implement keyboard shortcuts for selection
-//TODOsoon optimize rendering of selected boxes
-//TODOsoon add support for touch devices
+/**
+ * TimePanel Component
+ * 
+ * Main interactive canvas component for timeline visualization.
+ * Handles PIXI.js rendering, drag-and-drop interactions, and selection state.
+ * 
+ * Features:
+ * - Interactive box rendering with PIXI.js
+ * - Drag-and-drop reordering with visual feedback
+ * - Real-time performance metrics
+ * - Optimized rendering (only updates changed elements)
+ */
 
-
-
-import React, { useRef, useEffect } from 'react';
-import * as PIXI from 'pixi.js';
+import React, { useRef, useEffect, memo, useCallback } from 'react';
+import { Application, Container, TickerCallback } from 'pixi.js';
 import { useTimePanelCanvas } from '../hooks/useTimePanelCanvas';
 import { useAppDispatch, useAppSelector } from '../hooks/redux';
 import { setActiveObject, dragDrop, setPerfMetrics } from '../store/boxSlice';
 import { createTimeBox } from './TimeBox';
-// import { colorToggle } from '../store/boxSlice';
+import { BoxObject, PANEL_CONFIG } from '../types';
 
 const TimePanel: React.FC = () => {
   // Use a ref for the container node to avoid unnecessary state updates
   const containerNodeRef = useRef<HTMLDivElement | null>(null);
-  const canvasTimePanelWidth = 550;
-  const canvasTimePanelHeight = 500;
-  const panelLineHeight = 35;
   // Use custom hook for PIXI app/canvas lifecycle
   const appRef = useTimePanelCanvas({
-    width: canvasTimePanelWidth,
-    height: canvasTimePanelHeight,
+    width: PANEL_CONFIG.CANVAS_WIDTH,
+    height: PANEL_CONFIG.CANVAS_HEIGHT,
     backgroundColor: 0xFFA500,
     backgroundAlpha: 1,
     containerNodeRef,
@@ -38,7 +37,7 @@ const TimePanel: React.FC = () => {
     }
   });
   // Map by object id, not line index
-  const objectsRef = useRef<Map<number, PIXI.Container>>(new Map());
+  const objectsRef = useRef<Map<number, Container>>(new Map());
   // ...existing code...
   const dispatch = useAppDispatch();
   const { objects, activeObjectId } = useAppSelector(state => state.boxes);
@@ -53,14 +52,8 @@ const TimePanel: React.FC = () => {
   // Track previous selected id to update only two containers on selection change
   const prevSelectedIdRef = useRef<number | null>(null);
 
-
-  // Debug logging
-  console.log('TimePanel render - objects:', objects);
-  console.log('TimePanel render - appRef.current:', appRef.current);
-  // ...existing code...
-
   // Helper to render boxes in PIXI
-  function renderBoxes(app: PIXI.Application) {
+  const renderBoxes = useCallback((app: Application) => {
     // Remove containers for objects that no longer exist
     const currentIds = new Set(objects.map(o => o.id));
     for (const [id, container] of objectsRef.current.entries()) {
@@ -79,7 +72,7 @@ const TimePanel: React.FC = () => {
         container = createTimeBox({
           obj: boxObj,
           activeObjectId,
-          onPointerDown: (event: PointerEvent, obj: any) => {
+          onPointerDown: (event: PointerEvent, obj: BoxObject) => {
             dispatch(setActiveObject(obj.id));
             isDraggingRef.current = true;
             dragStartYRef.current = event.clientY;
@@ -91,12 +84,12 @@ const TimePanel: React.FC = () => {
         objectsRef.current.set(boxObj.id, container);
       }
       // Keep position synced (fallback to stackOrder line if no y)
-      const newY = (boxObj as any).y ?? boxObj.stackOrder * panelLineHeight;
+      const newY = (boxObj as BoxObject).y ?? boxObj.stackOrder * PANEL_CONFIG.LINE_HEIGHT;
       if (container.y !== newY) container.y = newY;
       // Selection visual (alpha only to avoid unsupported tint on Container)
       container.alpha = boxObj.id === activeObjectId ? 1 : 0.9;
     }
-  }
+  }, [objects, activeObjectId]);
 
   // Only update visual state of selected box when selection changes (touch 2 containers max)
   useEffect(() => {
@@ -130,7 +123,7 @@ const TimePanel: React.FC = () => {
         const container = objectsRef.current.get(id);
         const draggedObj = objectsRefState.current.find(o => o.id === id);
         if (container && draggedObj) {
-          const baseY = (draggedObj as any).y ?? draggedObj.stackOrder * panelLineHeight;
+          const baseY = (draggedObj as BoxObject).y ?? draggedObj.stackOrder * PANEL_CONFIG.LINE_HEIGHT;
           container.y = baseY + deltaY;
         }
       }
@@ -146,7 +139,7 @@ const TimePanel: React.FC = () => {
             0,
             Math.min(
               objectsRefState.current.length - 1,
-              Math.round(deltaY / panelLineHeight) + draggedObject.stackOrder
+              Math.round(deltaY / PANEL_CONFIG.LINE_HEIGHT) + draggedObject.stackOrder
             )
           );
           if (newStackOrder !== draggedObject.stackOrder) {
@@ -175,7 +168,7 @@ const TimePanel: React.FC = () => {
     let frames = 0;
     let accum = 0;
 
-  const tick: PIXI.TickerCallback<any> = () => {
+  const tick: TickerCallback<Application> = () => {
       const now = performance.now();
       const dt = now - lastTime;
       lastTime = now;
@@ -200,4 +193,4 @@ const TimePanel: React.FC = () => {
   return <div ref={containerNodeRef} className="pixi-canvas-top" />;
 };
 
-export default TimePanel;
+export default memo(TimePanel);
