@@ -11,13 +11,16 @@
 - [x] ~~if i dragdrop a box, it becomes selected. if another box was selected. this selection is cancelled.~~ **IMPLEMENTED**: Dragged box becomes selected immediately when drag starts, cancelling previous selection
 - [x] ~~when i dragdrop a box and, doing so, I hover a box, it shouldn't draw a hover box over that line/box~~ **FIXED**: Hover effects disabled during drag operations
 - [x] ~~if i dragdrop a box and drop before its stackOrder changes, the box stays where I droped and it should come back at its initial place~~ **FIXED**: Box returns to original position when dropped without stack order change
-- [x] ~~stackorder should change when box is dragged after 60% if going down and above 40% if going up~~ **IMPLEMENTED**: Asymmetric drag thresholds for better UX
 
 
 - add a top margin of 25 px at the top
 - [ ] generate 15 boxes. that makes more boxes that can be displayed with the canvas height. display a vertical scrollbar so that you can see the unseen boxes.
 - [ ] Multi-select boxes/lines when Shift is pressed
 - [ ] Drag-and-drop for multiple selected boxes/lines
+
+list of things to test:
+during dragdrop, what is dragged is displayed UNDER all other boxes
+
 
 
 make my mind clear about differences timeTracks, PanelLines, TimeObjects... then

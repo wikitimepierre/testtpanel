@@ -23,6 +23,7 @@ const TimePanel: React.FC = () => {
     backgroundAlpha: 1,
     containerNodeRef,
     onInit: (app) => {
+      app.stage.sortableChildren = true; // Enable z-index based sorting
       renderBoxes(app);
     },
     onCleanup: () => {
@@ -214,6 +215,14 @@ const TimePanel: React.FC = () => {
       const newY = (boxObj as BoxObject).y ?? boxObj.stackOrder * PANEL_CONFIG.LINE_HEIGHT;
       if (container.y !== newY) container.y = newY;
       
+      // Set z-index based on stack order (for proper layering)
+      // But keep dragged box at -1 during drag operations
+      if (isDraggingRef.current && dragObjectIdRef.current === boxObj.id) {
+        container.zIndex = -1; // Keep dragged box behind all others
+      } else {
+        container.zIndex = boxObj.stackOrder;
+      }
+      
       // Update selection background visibility based on current activeObjectId
       const selectionBg = container.children.find(child => 
         child instanceof Graphics && (child as any).isSelectionBackground
@@ -278,6 +287,13 @@ const TimePanel: React.FC = () => {
           // Immediately select the dragged box when drag starts
           const id = dragObjectIdRef.current;
           dispatch(setActiveObject(id));
+          
+          // Make dragged box appear under all other boxes
+          const container = objectsRef.current.get(id);
+          if (container && appRef.current?.stage) {
+            container.zIndex = -1; // Put dragged box behind all others
+            appRef.current.stage.sortableChildren = true;
+          }
         }
         
         if (isDraggingRef.current) {
@@ -287,6 +303,8 @@ const TimePanel: React.FC = () => {
           if (container && draggedObj) {
             const baseY = (draggedObj as BoxObject).y ?? draggedObj.stackOrder * PANEL_CONFIG.LINE_HEIGHT;
             container.y = baseY + (event.clientY - dragStartYRef.current);
+            // Ensure dragged box stays behind all others during entire drag
+            container.zIndex = -1;
           }
         }
       }
@@ -309,6 +327,8 @@ const TimePanel: React.FC = () => {
               if (container) {
                 const originalY = (draggedObject as BoxObject).y ?? draggedObject.stackOrder * PANEL_CONFIG.LINE_HEIGHT;
                 container.y = originalY;
+                // Reset z-index to normal layering
+                container.zIndex = draggedObject.stackOrder;
               }
             }
             // Note: Selection already happened when drag started
@@ -322,6 +342,16 @@ const TimePanel: React.FC = () => {
           } else {
             dispatch(setActiveObject(id)); // Select if clicking a different object
           }
+        }
+      }
+      
+      // Reset z-index for dragged container after any drag operation
+      if (isDraggingRef.current && dragObjectIdRef.current !== null) {
+        const container = objectsRef.current.get(dragObjectIdRef.current);
+        const draggedObject = objectsRefState.current.find(o => o.id === dragObjectIdRef.current);
+        if (container && draggedObject) {
+          // Reset to proper stack order-based z-index
+          container.zIndex = draggedObject.stackOrder;
         }
       }
       
