@@ -9,6 +9,8 @@
 - [x] ~~when i undo or redo, every box/line is free of hover visual feedback~~ **IMPLEMENTED**: Hover states cleared on undo/redo operations
 - [x] ~~bug: if i select a box and then dragdrop it, it is unselected. it should be unselected ONLY if i click it not dragdrop it.~~ **FIXED**: Selection now persists after drag operations
 - [x] ~~if i dragdrop a box, it becomes selected. if another box was selected. this selection is cancelled.~~ **IMPLEMENTED**: Dragged box becomes selected immediately when drag starts, cancelling previous selection
+- [x] ~~when i dragdrop a box and, doing so, I hover a box, it shouldn't draw a hover box over that line/box~~ **FIXED**: Hover effects disabled during drag operations
+- destination of box that is dragdrop should 
 
 
 - add a top margin of 25 px at the top

@@ -12,14 +12,14 @@ export interface TimeBoxProps {
   obj: BoxObject | null;
   activeObjectId: number | null;
   onPointerDown: PointerEventHandler;
-  isPanelLineDragging: boolean;
+  isDragging: () => boolean;
 }
 
 /**
  * Creates a PIXI container representing a timeline box with hover and interaction support
  */
 
-export function createTimeBox({ obj, activeObjectId, onPointerDown, isPanelLineDragging }: TimeBoxProps) {
+export function createTimeBox({ obj, activeObjectId, onPointerDown, isDragging }: TimeBoxProps) {
   const container = new Container();
   container.x = 0;
   container.y = obj ? obj.y : 0;
@@ -78,7 +78,7 @@ export function createTimeBox({ obj, activeObjectId, onPointerDown, isPanelLineD
 
   // Hover logic for the entire line
   container.on('pointerenter', () => {
-    if (!isPanelLineDragging) {
+    if (!isDragging()) {
       // Only show hover background if not selected
       if (obj?.id !== activeObjectId) {
         hoverBg.visible = true;
@@ -92,7 +92,7 @@ export function createTimeBox({ obj, activeObjectId, onPointerDown, isPanelLineD
   });
   
   container.on('pointerleave', () => {
-    if (!isPanelLineDragging) {
+    if (!isDragging()) {
       hoverBg.visible = false;
       if (box) {
         // Restore original border

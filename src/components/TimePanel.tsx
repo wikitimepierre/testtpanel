@@ -246,7 +246,7 @@ const TimePanel: React.FC = () => {
             dragStartYRef.current = event.clientY;
             dragObjectIdRef.current = obj.id;
           },
-          isPanelLineDragging: isDraggingRef.current,
+          isDragging: () => isDraggingRef.current,
         });
         app.stage.addChild(container);
         objectsRef.current.set(boxObj.id, container);
