@@ -352,6 +352,13 @@ const TimePanel: React.FC = () => {
             
             if (newStackOrder !== draggedObject.stackOrder) {
               dispatch(dragDrop({ id, newStackOrder }));
+            } else {
+              // No stack order change - reset container to original position
+              const container = objectsRef.current.get(id);
+              if (container) {
+                const originalY = (draggedObject as BoxObject).y ?? draggedObject.stackOrder * PANEL_CONFIG.LINE_HEIGHT;
+                container.y = originalY;
+              }
             }
             // Note: Selection already happened when drag started
           }

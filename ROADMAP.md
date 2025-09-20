@@ -10,7 +10,7 @@
 - [x] ~~bug: if i select a box and then dragdrop it, it is unselected. it should be unselected ONLY if i click it not dragdrop it.~~ **FIXED**: Selection now persists after drag operations
 - [x] ~~if i dragdrop a box, it becomes selected. if another box was selected. this selection is cancelled.~~ **IMPLEMENTED**: Dragged box becomes selected immediately when drag starts, cancelling previous selection
 - [x] ~~when i dragdrop a box and, doing so, I hover a box, it shouldn't draw a hover box over that line/box~~ **FIXED**: Hover effects disabled during drag operations
-- destination of box that is dragdrop should 
+- [x] ~~if i dragdrop a box and drop before its stackOrder changes, the box stays where I droped and it should come back at its initial place~~ **FIXED**: Box returns to original position when dropped without stack order change
 
 
 - add a top margin of 25 px at the top
