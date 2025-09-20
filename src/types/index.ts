@@ -17,4 +17,7 @@ export interface AppState {
   historyIndex: number;
   objects: BoxObject[];
   history: BoxObject[][];
+  // Performance metrics (dev only)
+  fps?: number;
+  containers?: number;
 }

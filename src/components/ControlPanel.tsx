@@ -4,7 +4,7 @@ import { undo, redo, deleteObject, generateBox } from '../store/boxSlice';
 
 const ControlPanel: React.FC = () => {
   const dispatch = useAppDispatch();
-  const { activeObjectId, history, historyIndex } = useAppSelector(state => state.boxes);
+  const { activeObjectId, history, historyIndex, fps, containers } = useAppSelector(state => state.boxes);
 
   const handleUndo = () => {dispatch(undo())};
   const handleRedo = () => {dispatch(redo())};
@@ -20,6 +20,10 @@ const ControlPanel: React.FC = () => {
       <button onClick={handleRedo} disabled={!canRedo}>Redo</button>
       <button onClick={handleDelete} disabled={activeObjectId === null}>Delete</button>
       <button onClick={handleNew}>New</button>
+      <div style={{ marginLeft: 12, display: 'inline-block' }}>
+        <span style={{ marginRight: 8 }}>FPS: {typeof fps === 'number' ? fps.toFixed(0) : '-'}</span>
+        <span>Containers: {typeof containers === 'number' ? containers : '-'}</span>
+      </div>
     </div>
   );
 };

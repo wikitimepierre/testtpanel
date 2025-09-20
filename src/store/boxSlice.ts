@@ -32,7 +32,9 @@ const initialState: AppState = {
   objects: initialObjects,
   activeObjectId: null,
   history: [JSON.parse(JSON.stringify(initialObjects))],
-  historyIndex: 0
+  historyIndex: 0,
+  fps: undefined,
+  containers: initialObjects.length
 };
 
 const saveToHistory = (state: AppState) => {
@@ -56,6 +58,12 @@ export const boxSlice = createSlice({
   name: 'boxes',
   initialState,
   reducers: {
+    setPerfMetrics: (state, action: PayloadAction<{ fps?: number; containers?: number }>) => {
+      const { fps, containers } = action.payload;
+      if (typeof fps === 'number') state.fps = fps;
+      if (typeof containers === 'number') state.containers = containers;
+      // Do not save to history for perf metrics
+    },
     setActiveObject: (state, action: PayloadAction<number | null>) => {
       state.activeObjectId = action.payload;
     },
@@ -168,6 +176,7 @@ export const boxSlice = createSlice({
 });
 
 export const {
+  setPerfMetrics,
   setActiveObject,
   // colorToggle,
   // loadObjects,
