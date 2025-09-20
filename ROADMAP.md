@@ -14,6 +14,7 @@
 
 
 - add a top margin of 25 px at the top
+- 
 - [ ] generate 15 boxes. that makes more boxes that can be displayed with the canvas height. display a vertical scrollbar so that you can see the unseen boxes.
 - [ ] Multi-select boxes/lines when Shift is pressed
 - [ ] Drag-and-drop for multiple selected boxes/lines

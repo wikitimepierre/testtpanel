@@ -56,7 +56,7 @@ export function createTimeBox({ obj, activeObjectId, onPointerDown, isDragging }
   let strokeWidth = 1;
   if (obj) {
     const baseFill = obj.color === 'grey' ? 0xDDDDDD : 0xFFFF00;
-    strokeWidth = obj.id === activeObjectId ? 4 : 2; // Thicker border for selected
+    strokeWidth = obj.id === activeObjectId ? 8 : 2; // Back to normal 8px thick
     box = new Graphics();
     box.clear();
     box.rect(obj.x, 0, obj.width, obj.height);
@@ -83,11 +83,6 @@ export function createTimeBox({ obj, activeObjectId, onPointerDown, isDragging }
       if (obj?.id !== activeObjectId) {
         hoverBg.visible = true;
       }
-      // if (box) {
-      //   // Enhance box border on hover
-      //   const hoverBorderWidth = obj?.id === activeObjectId ? 5 : 3; // Thicker if selected
-      //   box.stroke({ width: hoverBorderWidth, color: 0x4A90E2 });
-      // }
     }
   });
   
@@ -96,7 +91,7 @@ export function createTimeBox({ obj, activeObjectId, onPointerDown, isDragging }
       hoverBg.visible = false;
       if (box) {
         // Restore original border
-        const strokeWidth = obj?.id === activeObjectId ? 4 : 2; // Thicker border for selected
+        const strokeWidth = obj?.id === activeObjectId ? 8 : 2; // Back to normal 8px thick
         box.stroke({ width: strokeWidth, color: 0x000000 });
       }
     }

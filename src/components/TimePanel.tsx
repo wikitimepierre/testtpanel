@@ -75,7 +75,10 @@ const TimePanel: React.FC = () => {
   }, []);
 
   // Helper function to clear all hover visual feedback
-  const clearAllHoverStates = useCallback(() => {
+  const clearAllHoverStates = useCallback((currentActiveObjectId: number | null = null) => {
+    // Use the passed activeObjectId or fall back to the ref
+    const activeId = currentActiveObjectId !== null ? currentActiveObjectId : activeObjectIdRef.current;
+    
     // Clear hover backgrounds from all containers
     for (const [id, container] of objectsRef.current.entries()) {
       const hoverBg = container.children.find(child => 
@@ -94,7 +97,7 @@ const TimePanel: React.FC = () => {
       if (box) {
         // Find the corresponding object to determine if it's selected for proper border width
         const obj = objectsRefState.current.find(o => o.id === id);
-        const strokeWidth = obj?.id === activeObjectIdRef.current ? 4 : 2;
+        const strokeWidth = obj?.id === activeId ? 8 : 2; // Back to normal 8px thick
         box.stroke({ width: strokeWidth, color: 0x000000 });
       }
     }
@@ -176,7 +179,7 @@ const TimePanel: React.FC = () => {
   // Helper to render boxes in PIXI
   const renderBoxes = useCallback((app: Application) => {
     // Clear all hover visual feedback when objects change (e.g., after undo/redo)
-    clearAllHoverStates();
+    clearAllHoverStates(activeObjectId);
     
     // Remove containers for objects that no longer exist
     const currentIds = new Set(objects.map(o => o.id));
@@ -229,6 +232,21 @@ const TimePanel: React.FC = () => {
       ) as Graphics | undefined;
       if (selectionBg) {
         selectionBg.visible = boxObj.id === activeObjectId;
+      }
+      
+      // Update box stroke width based on selection state
+      const box = container.children.find(child => 
+        child instanceof Graphics && 
+        !(child as any).isHoverBackground && 
+        !(child as any).isSelectionBackground
+      ) as Graphics | undefined;
+      if (box) {
+        const strokeWidth = boxObj.id === activeObjectId ? 8 : 2;
+        box.clear(); // Clear previous graphics
+        box.rect(boxObj.x, 0, boxObj.width, boxObj.height);
+        const baseFill = boxObj.color === 'grey' ? 0xDDDDDD : 0xFFFF00;
+        box.fill(baseFill);
+        box.stroke({ width: strokeWidth, color: 0x000000 });
       }
       
       // Selection visual (alpha only to avoid unsupported tint on Container)
