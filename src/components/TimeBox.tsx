@@ -6,7 +6,7 @@
  */
 
 import { Container, Graphics, Text } from 'pixi.js';
-import { BoxObject, PointerEventHandler } from '../types';
+import { BoxObject, PointerEventHandler, PANEL_CONFIG } from '../types';
 
 export interface TimeBoxProps {
   obj: BoxObject | null;
@@ -25,13 +25,16 @@ export function createTimeBox({ obj, activeObjectId, onPointerDown, isPanelLineD
   container.y = obj ? obj.y : 0;
 
   // Panel line background (full width, behind the box)
-  const panelLineWidth = 550;
-  const panelLineHeight = obj ? obj.height + 4 : 34; // Default height if no box
+  const panelLineWidth = PANEL_CONFIG.CANVAS_WIDTH;
+  const panelLineHeight = obj ? obj.height + 4 : PANEL_CONFIG.LINE_HEIGHT + 4;
   const hoverBg = new Graphics();
   hoverBg.clear();
-  hoverBg.rect(0, -4, panelLineWidth, panelLineHeight);
-  hoverBg.fill(0x0000FF); hoverBg.alpha = 0.2;
+  hoverBg.rect(0, -2, panelLineWidth, panelLineHeight);
+  hoverBg.fill(0x4A90E2); // More professional blue color
+  hoverBg.alpha = 0.15; // Subtle transparency
   hoverBg.visible = false;
+  // Mark this as the hover background for external control
+  (hoverBg as any).isHoverBackground = true;
 
   container.addChild(hoverBg);
 
@@ -41,7 +44,7 @@ export function createTimeBox({ obj, activeObjectId, onPointerDown, isPanelLineD
   let strokeWidth = 2;
   if (obj) {
     const baseFill = obj.color === 'grey' ? 0xDDDDDD : 0xFFFF00;
-    strokeWidth = obj.id === activeObjectId ? 5 : 2;
+    strokeWidth = obj.id === activeObjectId ? 4 : 2; // Thicker border for selected
     box = new Graphics();
     box.clear();
     box.rect(obj.x, 0, obj.width, obj.height);
@@ -59,19 +62,27 @@ export function createTimeBox({ obj, activeObjectId, onPointerDown, isPanelLineD
   }
 
   container.eventMode = 'static';
-  container.cursor = 'pointer';
+  container.cursor = obj ? 'pointer' : 'default'; // Only show pointer cursor if there's an actual box
 
   // Hover logic for the entire line
   container.on('pointerenter', () => {
     if (!isPanelLineDragging) {
       hoverBg.visible = true;
-      if (box) box.stroke({ width: 2, color: 0x0000FF });
+      if (box) {
+        // Enhance box border on hover
+        box.stroke({ width: 3, color: 0x4A90E2 });
+      }
     }
   });
+  
   container.on('pointerleave', () => {
     if (!isPanelLineDragging) {
       hoverBg.visible = false;
-      if (box) box.stroke({ width: strokeWidth, color: 0x000000 });
+      if (box) {
+        // Restore original border
+        const originalColor = obj?.id === activeObjectId ? 0x000000 : 0x000000;
+        box.stroke({ width: strokeWidth, color: originalColor });
+      }
     }
   });
   container.on('pointerdown', (event: PointerEvent) => {

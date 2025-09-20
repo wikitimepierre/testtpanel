@@ -2,8 +2,8 @@
 
 ## High Priority Features
 - [x] ~~screen flashes each time i select a box (or any action)~~ **FIXED**: Optimized PIXI canvas lifecycle and React re-renders
-- [ ] Hover box or line (with box) shows hoberbg
-- [ ] Click box or line to select contained box and line
+- [x] ~~hover a box shows a Panel line background... hover a line with a box (not lines with no boxes) should do the same~~ **IMPLEMENTED**: Enhanced hover with professional styling
+- [ ] Click box or line selects the box and line and shows a visual feedeback (box has wider border + line is darker). Clicking again unselects the box and line
 - [ ] Multi-select functionality for boxes/lines
 - [ ] Drag-and-drop for multiple selected boxes/lines
 
