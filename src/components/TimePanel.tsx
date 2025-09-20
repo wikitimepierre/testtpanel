@@ -1,14 +1,7 @@
 /**
  * TimePanel Component
- * 
- * Main interactive canvas component for timeline visualization.
- * Handles PIXI.js rendering, drag-and-drop interactions, and selection state.
- * 
- * Features:
  * - Interactive box rendering with PIXI.js
  * - Drag-and-drop reordering with visual feedback
- * - Real-time performance metrics
- * - Optimized rendering (only updates changed elements)
  */
 
 import React, { useRef, useEffect, memo, useCallback } from 'react';
@@ -217,14 +210,7 @@ const TimePanel: React.FC = () => {
     });
 
     lineContainer.on('pointerdown', (event: PointerEvent) => {
-      const currentActiveId = activeObjectIdRef.current;
-      // Toggle selection: if already selected, unselect; otherwise select
-      if (currentActiveId === boxObj.id) {
-        dispatch(setActiveObject(null)); // Unselect if clicking the same object
-      } else {
-        dispatch(setActiveObject(boxObj.id)); // Select if clicking a different object
-      }
-      // Don't start dragging immediately - wait for pointer move
+      // Don't toggle selection immediately - wait to see if this becomes a drag
       dragStartYRef.current = event.clientY;
       dragObjectIdRef.current = boxObj.id;
     });
@@ -256,14 +242,7 @@ const TimePanel: React.FC = () => {
           obj: boxObj,
           activeObjectId,
           onPointerDown: (event: PointerEvent, obj: BoxObject) => {
-            const currentActiveId = activeObjectIdRef.current;
-            // Toggle selection: if already selected, unselect; otherwise select
-            if (currentActiveId === obj.id) {
-              dispatch(setActiveObject(null)); // Unselect if clicking the same object
-            } else {
-              dispatch(setActiveObject(obj.id)); // Select if clicking a different object
-            }
-            // Don't start dragging immediately - wait for pointer move
+            // Don't toggle selection immediately - wait to see if this becomes a drag
             dragStartYRef.current = event.clientY;
             dragObjectIdRef.current = obj.id;
           },
@@ -342,6 +321,9 @@ const TimePanel: React.FC = () => {
         // Start dragging only if moved more than 5 pixels (drag threshold)
         if (!isDraggingRef.current && deltaY > 5) {
           isDraggingRef.current = true;
+          // Immediately select the dragged box when drag starts
+          const id = dragObjectIdRef.current;
+          dispatch(setActiveObject(id));
         }
         
         if (isDraggingRef.current) {
@@ -360,14 +342,27 @@ const TimePanel: React.FC = () => {
     };
 
     const handlePointerUp = (event: PointerEvent) => {
-      if (isDraggingRef.current && dragObjectIdRef.current !== null) {
-        const id = dragObjectIdRef.current;
-        const draggedObject = objectsRefState.current.find(o => o.id === id);
-        if (draggedObject) {
-          const newStackOrder = calculateTargetStackOrder(event.clientY, draggedObject);
-          
-          if (newStackOrder !== draggedObject.stackOrder) {
-            dispatch(dragDrop({ id, newStackOrder }));
+      if (dragObjectIdRef.current !== null) {
+        if (isDraggingRef.current) {
+          // Handle drag operation
+          const id = dragObjectIdRef.current;
+          const draggedObject = objectsRefState.current.find(o => o.id === id);
+          if (draggedObject) {
+            const newStackOrder = calculateTargetStackOrder(event.clientY, draggedObject);
+            
+            if (newStackOrder !== draggedObject.stackOrder) {
+              dispatch(dragDrop({ id, newStackOrder }));
+            }
+            // Note: Selection already happened when drag started
+          }
+        } else {
+          // Handle click (no drag occurred) - toggle selection
+          const id = dragObjectIdRef.current;
+          const currentActiveId = activeObjectIdRef.current;
+          if (currentActiveId === id) {
+            dispatch(setActiveObject(null)); // Unselect if clicking the same object
+          } else {
+            dispatch(setActiveObject(id)); // Select if clicking a different object
           }
         }
       }

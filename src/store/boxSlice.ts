@@ -14,9 +14,9 @@ import { BoxObject, AppState, ContainerProperties, PANEL_CONFIG } from '../types
 const buildBox = (id: number): BoxObject => ({
   id,
   type: 'box',
-  x: Math.random() * 400,
+  x: Math.random() * 550 - 100,
   y: id * PANEL_CONFIG.LINE_HEIGHT,
-  width: PANEL_CONFIG.DEFAULT_BOX_WIDTH + Math.random() * 100,
+  width: PANEL_CONFIG.DEFAULT_BOX_WIDTH + Math.random() * 50 + 50,
   height: PANEL_CONFIG.DEFAULT_BOX_HEIGHT,
   text: `box-${id}`,
   color: 'grey',

@@ -7,8 +7,27 @@
 - [x] ~~I select a line/box. then i drag that selection. when I drop it will move that selection to a destination. I want to visualize that potential destination as a black line before i actually drop it by releasing the mouse button.~~ **IMPLEMENTED**: Drag destination preview with accurate positioning
 - [x] ~~when i undo or redo, every box/line is unselected~~ **IMPLEMENTED**: Selection cleared on undo/redo operations
 - [x] ~~when i undo or redo, every box/line is free of hover visual feedback~~ **IMPLEMENTED**: Hover states cleared on undo/redo operations
+- [x] ~~bug: if i select a box and then dragdrop it, it is unselected. it should be unselected ONLY if i click it not dragdrop it.~~ **FIXED**: Selection now persists after drag operations
+- [x] ~~if i dragdrop a box, it becomes selected. if another box was selected. this selection is cancelled.~~ **IMPLEMENTED**: Dragged box becomes selected immediately when drag starts, cancelling previous selection
+
+
+- add a top margin of 25 px at the top
+- [ ] generate 15 boxes. that makes more boxes that can be displayed with the canvas height. display a vertical scrollbar so that you can see the unseen boxes.
 - [ ] Multi-select boxes/lines when Shift is pressed
 - [ ] Drag-and-drop for multiple selected boxes/lines
+
+
+make my mind clear about differences timeTracks, PanelLines, TimeObjects... then
+rename variables so it's compatible with PanelLines, TimeObjects, ...
+
+import types timeObjects, timeBox, wikidates, ...
+
+how to prepare height of each line (topmargin line, timebox lines, start container lines, end container lines will be higher than others) ?
+
+
+evaluate different control modes:
+A) normal mode: drag drop background to pan vertically + scrollbar
+B) edition mode (enter by long click on a line/box): drag drop line/box + pan with scrollbar only. Maybe there should be an edition mode where you dragdrop 
 
 ## Medium Priority Features  
 - [ ] Visual feedback improvements for selected boxes/lines
